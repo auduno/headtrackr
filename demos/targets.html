@@ -1,0 +1,190 @@
+<!doctype html>
+<html lang="en">
+	<head>
+		<title>facetracking</title>
+		<meta charset="utf-8">
+		<meta name="viewport" content="width=device-width, user-scalable=no, minimum-scale=1.0, maximum-scale=1.0">
+		<style>
+			body {
+				font-family: Monospace;
+				background-color: #f0f0f0;
+				margin: 0px;
+				overflow: hidden;
+			}
+		</style>
+	</head>
+	<body>
+
+		<script src="./js/Three.js"></script>
+		<script src="./js/Stats.js"></script>
+		<script src="./js/main.js"></script>
+		<script src="./js/ccv.js"></script>
+		<script src="./js/cascade.js"></script>
+		<script src="./js/whitebalance.js"></script>
+		<script src="./js/smoother.js"></script>
+		<script src="./js/camshift.js"></script>
+		<script src="./js/facetrackr.js"></script>
+		<script src="./js/ui.js"></script>
+		<script src="./js/headposition.js"></script>
+		<script src="./js/controllers.js"></script>
+		
+		<!-- for performance reasons, we specify the canvas here -->
+		<!-- see http://jsperf.com/canvas-get-pixels-performance -->
+		<canvas id="compare" width="320" height="240" style="display:none"></canvas>
+		<canvas id="debug" width="320" height="240"></canvas>
+		<video id="vid" autoplay loop></video>
+				
+				
+			
+		<script>
+			var videoInput = document.getElementById('vid');
+			var canvasInput = document.getElementById('compare');
+			var debugInput = document.getElementById('debug');
+			
+			// 3d model setup
+			
+			var container, stats;
+			var camera, scene, renderer;
+			var plane;
+			
+			function init() {
+
+				container = document.createElement( 'div' );
+				document.body.appendChild( container );
+
+				scene = new THREE.Scene();
+				//scene.fog = new THREE.FogExp2( 0xeeeeee, 0.0005 );
+				//scene.fog = new THREE.FogExp2( 0x000000, 0.0004 );
+				//scene.fog = new THREE.Fog( 0xeeeeee, 1, 5000 );
+				scene.fog = new THREE.Fog( 0x000000, 1, 5000 );
+    
+				camera = new THREE.PerspectiveCamera( 23, window.innerWidth / window.innerHeight, 1, 100000 );
+				camera.position.z = 6000;
+				scene.add( camera );
+				
+				// Planes
+				
+				//top wall
+				plane1 = new THREE.Mesh( new THREE.PlaneGeometry( 500, 3000, 5, 15 ), new THREE.MeshBasicMaterial( { color: 0xcccccc, wireframe : true } ) );
+				plane1.rotation.x = Math.PI/2;
+				plane1.position.y = 250;
+				plane1.position.z = 50-1500;
+				scene.add( plane1 );
+				
+				//left wall
+				plane2 = new THREE.Mesh( new THREE.PlaneGeometry( 3000, 500, 15, 5 ), new THREE.MeshBasicMaterial( { color: 0xcccccc, wireframe : true } ) );
+				plane2.rotation.y = Math.PI/2;
+				plane2.position.x = -250;
+				plane2.position.z = 50-1500;
+				scene.add( plane2 );
+				
+				//right wall
+				plane3 = new THREE.Mesh( new THREE.PlaneGeometry( 3000, 500, 15, 5 ), new THREE.MeshBasicMaterial( { color: 0xcccccc, wireframe : true	} ) );
+				plane3.rotation.y = -Math.PI/2;
+				plane3.position.x = 250;
+				plane3.position.z = 50-1500;
+				scene.add( plane3 );
+				
+				//bottom wall
+				plane4 = new THREE.Mesh( new THREE.PlaneGeometry( 500, 3000, 5, 15 ), new THREE.MeshBasicMaterial( { color: 0xcccccc, wireframe : true	} ) );
+				plane4.rotation.x = -Math.PI/2;
+				plane4.position.y = -250;
+				plane4.position.z = 50-1500;
+				scene.add( plane4 );
+				
+				//Targets
+				
+				// Load sprite map
+				var targt = THREE.ImageUtils.loadTexture( "./media/target1.png" );
+				
+		var placeTarget = function(x,y,z) {
+            // Create sprites with lines
+            
+            /*var sprite = new THREE.Sprite( { map: targt, useScreenCoordinates: false, affectedByDistance: true} );
+            sprite.scale.x = 2;
+            sprite.scale.y = 2;
+            sprite.position.x = x;
+            sprite.position.y = y;
+            sprite.position.z = z;
+            scene.add( sprite );*/
+            
+            // Cylinder
+			//var cylinder = new THREE.Mesh( new THREE.CylinderGeometry(30,30,1,20,1,false), new THREE.MeshBasicMaterial( { color : Math.random() * 0x808008 + 0x808080} ) );
+			var cylinder = new THREE.Mesh( new THREE.CylinderGeometry(30,30,1,20,1,false), new THREE.MeshBasicMaterial( { color : 0xeeeeee} ) );
+			cylinder.position.x = x;
+			cylinder.rotation.x = Math.PI/2;
+			cylinder.position.y = y;
+			cylinder.position.z = z;
+			scene.add( cylinder );
+            
+            var geometry = new THREE.Geometry();
+            geometry.vertices.push( new THREE.Vertex( new THREE.Vector3( 0, 0, -80000 ) ) );
+            geometry.vertices.push( new THREE.Vertex( new THREE.Vector3( 0, 0, z ) ) );
+            var line = new THREE.Line( geometry, new THREE.LineBasicMaterial( { color: 0xeeeeee } ) );
+            line.position.x = x;
+            line.position.y = y;
+            scene.add( line );
+        }
+								
+        placeTarget(-150,-150,-550);
+        placeTarget(0,-150,-200);
+        placeTarget(100,0,500);
+        placeTarget(-150,100,0);
+        placeTarget(150,-100,-1050);
+        placeTarget(50,0,1100);
+        placeTarget(-50,-50,600);
+        placeTarget(0,150,-2100);
+        placeTarget(-130,0,-700);
+				
+				//renderer = new THREE.WebGLRenderer();
+				renderer = new THREE.WebGLRenderer({ clearAlpha: 1 });
+				renderer.setSize( window.innerWidth, window.innerHeight );
+
+				container.appendChild( renderer.domElement );
+				
+			}
+      
+      var stats = new Stats();
+			stats.domElement.style.position = 'absolute';
+			stats.domElement.style.top = '0px';
+			document.body.appendChild( stats.domElement );
+      
+			function animate() {
+
+				renderer.render(scene, camera);
+				stats.update();
+
+				requestAnimationFrame( animate );
+
+			}
+			
+			init();
+			animate();
+			
+			// video styling
+      videoInput.style.position = 'absolute';
+      videoInput.style.top = '50px';
+      videoInput.style.zIndex = '100001';
+      videoInput.style.display = 'block';
+			
+      debugInput.style.position = 'absolute';
+      debugInput.style.top = '290px';
+      debugInput.style.zIndex = '100001';
+      debugInput.style.display = 'block';
+      
+			// set up camera controller
+			headtrackr.controllers.three.realisticAbsoluteCameraControl(camera, 27, [0,0,50], new THREE.Vector3(0,0,0), {damping : 0.5});
+			//headtrackr.cameraControl_threejs(camera, 1000);
+			
+			// Face detection setup
+			var htracker = new headtrackr.Tracker({altVideo : "./media/testvideo.ogv", debug: debugInput, fov : 56});
+			htracker.init(videoInput, canvasInput);
+			htracker.start();
+			
+	document.addEventListener('headtrackingEvent', function(event) {
+		scene.fog = new THREE.Fog( 0x000000, 1+(event.z*27), 3000+(event.z*27) );
+		
+	}, false);
+		</script>
+	</body>
+</html>
