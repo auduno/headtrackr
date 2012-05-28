@@ -33,13 +33,22 @@ headtrackr.Ui = function() {
 	d2.appendChild(p);
 	d.appendChild(d2);
 	document.body.appendChild(d);
-
+  
+  statusMessages = {
+    "whitebalance" : "Waiting for camera whitebalancing",
+    "detecting" : "Please wait while camera is detecting your face...",
+    "hints" : "We seem to have some problems detecting your face. Please make sure that your face is well and evenly lighted, and that your camera is working.",
+    "redetecting" : "Lost track of face, trying to detect again..",
+    "lost" : "Lost track of face :(",
+    "found" : "Face found! Move your head!"
+  };
+  
 	// function to call messages (and to fade them out after a time)
-	this.setMessage = function(text) {
-		window.clearTimeout(timeout);
+  document.addEventListener("headtrackrStatus", function(event) {
+    window.clearTimeout(timeout);
 		var messagep = document.getElementById('headtrackerMessage');
-		messagep.innerHTML = text;
+		messagep.innerHTML = statusMessages[event.status];
 		timeout = window.setTimeout(function() {messagep.innerHTML = ''; }, 3000);
-	}
+  }, true);
 	
 }

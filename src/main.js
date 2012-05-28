@@ -19,6 +19,8 @@
  *	fov {number} : horizontal field of view of used camera in degrees (default is to estimate this)
  *	fadeVideo {boolean} : whether to fade out video when face is detected (default is false)
  *	cameraOffset {number} : distance from camera to center of screen, used to offset position of head (default is 11.5)
+ *	calcAngles {boolean} : whether to calculate angles when doing facetracking (default is false)
+ *	headPosition {boolean} : whether to calculate headposition (default is true)
  *
  * @author auduno / github.com/auduno
  */
@@ -47,6 +49,8 @@ headtrackr.Tracker = function(params) {
 	if (params.detectionInterval === undefined) params.detectionInterval = 20;
 	if (params.fadeVideo === undefined) params.fadeVideo = false;
 	if (params.cameraOffset === undefined) params.cameraOffset = 11.5;
+	if (params.calcAngles === undefined) params.calcAngles = false;
+	if (params.headPosition === undefined) params.headPosition = true;
 	
 	var ui, smoother, facetracker, headposition, canvasContext, videoElement, detector;
 	var detectionTimer;
@@ -59,6 +63,9 @@ headtrackr.Tracker = function(params) {
 	var headDiagonal = [];
 	
 	this.status = "";
+	
+	var statusEvent = document.createEvent("Event");
+  statusEvent.initEvent("headtrackrStatus", true, true);
 	
 	this.init = function(video, canvas) {
 	
@@ -118,9 +125,6 @@ headtrackr.Tracker = function(params) {
 		// create ui if needed
 		if (params.ui) {
 			ui = new headtrackr.Ui();
-		} else {
-			ui = {};
-			ui.setMessage = function(str) {};
 		}
 		
 		// create smoother if enabled
@@ -135,7 +139,7 @@ headtrackr.Tracker = function(params) {
 		
 		// if facetracking hasn't started, initialize facetrackr
 		if (facetracker === undefined) {
-			facetracker = new headtrackr.facetrackr.Tracker({debug : params.debug});
+			facetracker = new headtrackr.facetrackr.Tracker({debug : params.debug, calcAngles : params.calcAngles});
 			facetracker.init(canvasElement);
 		}
 		
@@ -143,8 +147,14 @@ headtrackr.Tracker = function(params) {
 		facetracker.track()
 		var faceObj = facetracker.getTrackingObject({debug : params.debug});
 		
-		if (faceObj.detection == "WB") ui.setMessage("Waiting for camera whitebalancing");
-		if (firstRun && faceObj.detection == "VJ") ui.setMessage("Please wait while camera is detecting your face...");
+		if (faceObj.detection == "WB") {
+		  statusEvent.status = "whitebalance";
+		  document.dispatchEvent(statusEvent);
+		}
+		if (firstRun && faceObj.detection == "VJ") {
+		  statusEvent.status = "detecting";
+		  document.dispatchEvent(statusEvent);
+		}
 		
 		// check if we have a detection first
 		if (!(faceObj.confidence == 0)) {
@@ -154,7 +164,8 @@ headtrackr.Tracker = function(params) {
 			    detectionTimer = (new Date).getTime();
 			  }
 			  if (((new Date).getTime() - detectionTimer) > 5000) {
-			    ui.setMessage("We seem to have some problems detecting your face. Please make sure that your face is well and evenly lighted, and that your camera is working.")
+			    statusEvent.status = "hints";
+          document.dispatchEvent(statusEvent);
 			  }
 			  
 				var x = (faceObj.x + faceObj.width/2); //midpoint
@@ -196,9 +207,10 @@ headtrackr.Tracker = function(params) {
 				if (faceObj.width == 0 || faceObj.height == 0) {
 					if (params.retryDetection) {
 						// retry facedetection
-						ui.setMessage("Lost track of face, trying to detect again..");
+						statusEvent.status = "redetecting";
+            document.dispatchEvent(statusEvent);
 						
-						facetracker = new headtrackr.facetrackr.Tracker({whitebalancing : false, debug: params.debug});
+						facetracker = new headtrackr.facetrackr.Tracker({whitebalancing : false, debug: params.debug, calcAngles : params.calcAngles});
 						facetracker.init(canvasElement);
 						faceFound = false;
 						headposition = undefined;
@@ -211,12 +223,14 @@ headtrackr.Tracker = function(params) {
 						
 						this.status = 'detecting';
 					} else {
-						ui.setMessage("Lost track of face :(");
+					  statusEvent.status = "redetecting";
+            document.dispatchEvent(statusEvent);
 						this.stop('lost tracking');
 					}
 				} else {
 					if (!faceFound) {
-						ui.setMessage("Face found! Move your head!");
+					  statusEvent.status = "found";
+            document.dispatchEvent(statusEvent);
 						faceFound = true;
 					}
 					
@@ -229,7 +243,7 @@ headtrackr.Tracker = function(params) {
 					}
 					
 					// get headposition
-					if (headposition === undefined) {
+					if (headposition === undefined && params.headPosition) {
             // wait until headdiagonal is stable before initializing headposition
             var stable = false;
             
@@ -262,7 +276,7 @@ headtrackr.Tracker = function(params) {
               }
               headposition.track(faceObj);
 						}
-					} else {
+					} else if (params.headPosition) {
             headposition.track(faceObj);
           }
 				}
