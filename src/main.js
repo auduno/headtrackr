@@ -64,35 +64,25 @@ headtrackr.Tracker = function(params) {
 	
 	this.status = "";
 	
-	var statusEvent = document.createEvent("Event");
+  var statusEvent = document.createEvent("Event");
   statusEvent.initEvent("headtrackrStatus", true, true);
 	
 	this.init = function(video, canvas) {
-	
+        
+        navigator.getUserMedia = navigator.getUserMedia || navigator.webkitGetUserMedia || navigator.mozGetUserMedia || navigator.msGetUserMedia;
+		window.URL = window.URL || window.webkitURL || window.msURL || window.mozURL;
+		
 		// check for camerasupport
-		if (window.navigator.getUserMedia) {
+		if (navigator.getUserMedia) {
 			this.status = "camera supported";
 		
 			// set up stream
-			window.navigator.getUserMedia({video: true}, function( stream ) {
-				video.src = stream;
+			navigator.getUserMedia({video: true}, function( stream ) {
+				video.src = window.URL.createObjectURL(stream);
+				video.play();
 				this.status = "camera found";
 			}, function() {
 				if (params.altVideo !== undefined) {
-					video.src = params.altVideo;
-					video.play();
-				}
-				this.status = "no camera found";
-			});
-		} else if (window.navigator.webkitGetUserMedia) {
-			// chrome
-			this.status = "camera supported";
-		
-			// set up stream
-			window.navigator.webkitGetUserMedia('video', function( stream ) {
-					video.src = window.webkitURL.createObjectURL(stream);
-			},function() {
-				if (params.altVideo) {
 					video.src = params.altVideo;
 					video.play();
 				}
