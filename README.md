@@ -39,24 +39,9 @@ The following code initiates the headtrackr with a video element which will be u
 </script>
 ```
 
-When the headtracker is started, this will now regularly generate the event *headtrackingEvent* on the document. This event has the attributes *x*, *y*, *z*, which tells us the estimated position of the users head in relation to the center of the screen, in centimeters.
+When the headtracker is started, this will now regularly generate the events *headtrackingEvent* and *facetrackingEvent* on the document. The event *headtrackingEvent* has the attributes *x*, *y*, *z*, which tells us the estimated position of the users head in relation to the center of the screen, in centimeters. The event *facetrackingEvent* has the attributes *x*, *y*, *width*, *height* and *angle*, which tell us the estimated position and size of the face on the video.
 
 You can now either create an eventlistener to handle these events somehow, or, if you're using [three.js](https://github.com/mrdoob/three.js/), try to use one of the pre-packaged controllers in this library to create pseudo-3D, aka [head-coupled perspective](http://en.wikipedia.org/wiki/Head-coupled_perspective) effects.
-
-**headtrackr** also generates the events *facetrackingEvent*, which tells us the position and size of the face on the video via the event attributes *x*, *y*, *width*, *height* and *angle*. If you're only interested in the the facetracking, you can disable the calculation of the headposition and the headtracking events via optional parameters when you initiate the tracker:
-
-```html
-<canvas id="inputCanvas" width="320" height="240" style="display:none"></canvas>
-<video id="inputVideo" autoplay loop></video>
-<script type="text/javascript">
-  var videoInput = document.getElementById('inputVideo');
-  var canvasInput = document.getElementById('inputCanvas');
-  
-  var htracker = new headtrackr.Tracker({headPosition : false});
-  htracker.init(videoInput, canvasInput);
-  htracker.start();
-</script>
-```
 
 To get some more idea about usage look at the source code for the examples above or have a look at [an overview here](http://.).
 
