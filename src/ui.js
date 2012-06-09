@@ -45,10 +45,12 @@ headtrackr.Ui = function() {
   
 	// function to call messages (and to fade them out after a time)
   document.addEventListener("headtrackrStatus", function(event) {
-    window.clearTimeout(timeout);
-		var messagep = document.getElementById('headtrackerMessage');
-		messagep.innerHTML = statusMessages[event.status];
-		timeout = window.setTimeout(function() {messagep.innerHTML = ''; }, 3000);
+    if (event.status in statusMessages) {
+      window.clearTimeout(timeout);
+		  var messagep = document.getElementById('headtrackerMessage');
+		  messagep.innerHTML = statusMessages[event.status];
+		  timeout = window.setTimeout(function() {messagep.innerHTML = ''; }, 3000);
+		}
   }, true);
 	
 }

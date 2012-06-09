@@ -67,29 +67,35 @@ headtrackr.Tracker = function(params) {
   var statusEvent = document.createEvent("Event");
   statusEvent.initEvent("headtrackrStatus", true, true);
 	
+	var headtrackerStatus = function(message) {
+	  statusEvent.status = message;
+		document.dispatchEvent(statusEvent);
+		this.status = message;
+	}
+	
 	this.init = function(video, canvas) {
         
-        navigator.getUserMedia = navigator.getUserMedia || navigator.webkitGetUserMedia || navigator.mozGetUserMedia || navigator.msGetUserMedia;
+    navigator.getUserMedia = navigator.getUserMedia || navigator.webkitGetUserMedia || navigator.mozGetUserMedia || navigator.msGetUserMedia;
 		window.URL = window.URL || window.webkitURL || window.msURL || window.mozURL;
 		
 		// check for camerasupport
 		if (navigator.getUserMedia) {
-			this.status = "camera supported";
-		
+		  headtrackerStatus("getUserMedia");
+		  
 			// set up stream
 			navigator.getUserMedia({video: true}, function( stream ) {
+				headtrackerStatus("camera found");
 				video.src = window.URL.createObjectURL(stream);
 				video.play();
-				this.status = "camera found";
 			}, function() {
+				headtrackerStatus("no camera");
 				if (params.altVideo !== undefined) {
 					video.src = params.altVideo;
 					video.play();
 				}
-				this.status = "no camera found";
 			});
 		} else {
-			this.status = "camera not supported";
+			headtrackerStatus("no getUserMedia");
 			
 			if (params.altVideo !== undefined) {
 				video.src = params.altVideo;
@@ -137,14 +143,8 @@ headtrackr.Tracker = function(params) {
 		facetracker.track()
 		var faceObj = facetracker.getTrackingObject({debug : params.debug});
 		
-		if (faceObj.detection == "WB") {
-		  statusEvent.status = "whitebalance";
-		  document.dispatchEvent(statusEvent);
-		}
-		if (firstRun && faceObj.detection == "VJ") {
-		  statusEvent.status = "detecting";
-		  document.dispatchEvent(statusEvent);
-		}
+		if (faceObj.detection == "WB") headtrackerStatus("whitebalance");
+		if (firstRun && faceObj.detection == "VJ") headtrackerStatus("detecting");
 		
 		// check if we have a detection first
 		if (!(faceObj.confidence == 0)) {
@@ -154,8 +154,7 @@ headtrackr.Tracker = function(params) {
 			    detectionTimer = (new Date).getTime();
 			  }
 			  if (((new Date).getTime() - detectionTimer) > 5000) {
-			    statusEvent.status = "hints";
-          document.dispatchEvent(statusEvent);
+			    headtrackerStatus("hints");
 			  }
 			  
 				var x = (faceObj.x + faceObj.width/2); //midpoint
@@ -197,8 +196,7 @@ headtrackr.Tracker = function(params) {
 				if (faceObj.width == 0 || faceObj.height == 0) {
 					if (params.retryDetection) {
 						// retry facedetection
-						statusEvent.status = "redetecting";
-            document.dispatchEvent(statusEvent);
+						headtrackerStatus("redetecting");
 						
 						facetracker = new headtrackr.facetrackr.Tracker({whitebalancing : false, debug: params.debug, calcAngles : params.calcAngles});
 						facetracker.init(canvasElement);
@@ -210,17 +208,13 @@ headtrackr.Tracker = function(params) {
               videoElement.style.opacity = 1;
               videoFaded = false;
             }
-						
-						this.status = 'detecting';
 					} else {
-					  statusEvent.status = "redetecting";
-            document.dispatchEvent(statusEvent);
-						this.stop('lost tracking');
+					  headtrackerStatus("lost");
+						this.stop();
 					}
 				} else {
 					if (!faceFound) {
-					  statusEvent.status = "found";
-            document.dispatchEvent(statusEvent);
+					  headtrackerStatus("found");
 						faceFound = true;
 					}
 					
@@ -300,8 +294,6 @@ headtrackr.Tracker = function(params) {
 		
 		// check if video is playing, if not, return false
 		if (!(videoElement.currentTime > 0 && !videoElement.paused && !videoElement.ended)) {
-		
-			this.status = 'waiting for video';
 			
 			run = true;
 			//set event
@@ -315,14 +307,10 @@ headtrackr.Tracker = function(params) {
 		return true;
 	}
 	
-	this.stop = function(text) {
+	this.stop = function() {
 		window.clearTimeout(detector);
 		run = false;
-		if (!text) {
-			this.status = 'stopped';
-		} else {
-			this.status = text;
-		}
+		headtrackerStatus("stopped");
 		facetracker = undefined;
 		
 		return true;

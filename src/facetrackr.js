@@ -56,7 +56,7 @@ headtrackr.facetrackr.Tracker = function(params) {
   
   var _confidenceThreshold = -10; // needed confidence before switching to Camshift
   var previousWhitebalances = []; // array of previous 10 whitebalance values
-  var pwbLength = 10;
+  var pwbLength = 15;
   
   this.init = function(inputcanvas) {
     _inputcanvas = inputcanvas
@@ -79,7 +79,7 @@ headtrackr.facetrackr.Tracker = function(params) {
     if (result.detection == "WB") {
       if (previousWhitebalances.length >= pwbLength) previousWhitebalances.pop();
       previousWhitebalances.unshift(result.wb);
-      if (previousWhitebalances.length == 10) {
+      if (previousWhitebalances.length == pwbLength) {
         //get max
         var max = Math.max.apply(null, previousWhitebalances);
         //get min
