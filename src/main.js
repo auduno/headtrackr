@@ -71,13 +71,11 @@ headtrackr.Tracker = function(params) {
 	  statusEvent.status = message;
 		document.dispatchEvent(statusEvent);
 		this.status = message;
-	}
+	}.bind(this);
 	
 	this.init = function(video, canvas) {
-        
     navigator.getUserMedia = navigator.getUserMedia || navigator.webkitGetUserMedia || navigator.mozGetUserMedia || navigator.msGetUserMedia;
 		window.URL = window.URL || window.webkitURL || window.msURL || window.mozURL;
-		
 		// check for camerasupport
 		if (navigator.getUserMedia) {
 		  headtrackerStatus("getUserMedia");
@@ -142,7 +140,7 @@ headtrackr.Tracker = function(params) {
 		// track face
 		facetracker.track()
 		var faceObj = facetracker.getTrackingObject({debug : params.debug});
-		
+    
 		if (faceObj.detection == "WB") headtrackerStatus("whitebalance");
 		if (firstRun && faceObj.detection == "VJ") headtrackerStatus("detecting");
 		
@@ -165,8 +163,6 @@ headtrackr.Tracker = function(params) {
 					debugContext.strokeStyle = "#0000CC";
 					debugContext.strokeRect(faceObj.x, faceObj.y, faceObj.width, faceObj.height);
 				}
-				
-				this.status = 'detecting';
 			}
 			if (faceObj.detection == "CS") {
 				var x = faceObj.x; //midpoint
@@ -267,7 +263,6 @@ headtrackr.Tracker = function(params) {
 			}
 		}
 	 
-		
 		if (run) {
 			detector = window.setTimeout(track, params.detectionInterval);
 		}
@@ -282,6 +277,7 @@ headtrackr.Tracker = function(params) {
 		
 		var canvasContent = headtrackr.getWhitebalance(canvasElement);
 		if (canvasContent > 0) {
+		  run = true;
       track();
 		} else {
       window.setTimeout(starter, 100);
@@ -312,6 +308,7 @@ headtrackr.Tracker = function(params) {
 		run = false;
 		headtrackerStatus("stopped");
 		facetracker = undefined;
+		faceFound = false;
 		
 		return true;
 	}
