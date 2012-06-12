@@ -11,7 +11,8 @@
  *
  * Optional parameters:
  *	ui {boolean} : whether to create messageoverlay with messages like "found face" (default is true)
- *	altVideo {string} : url to alternative video, if camera is not found or not supported
+ *	altVideo {object} : urls to any alternative videos, if camera is not found or not supported
+ *      the format is : {'ogv' : 'somevideo.ogv', 'mp4' : 'somevideo.mp4', 'webm' : 'somevideo.webm'}
  *	smoothing {boolean} : whether to use smoothing (default is true)
  *	debug {canvas} : pass along a canvas to paint output of facedetection, for debugging
  *	detectionInterval {number} : time we wait before doing a new facedetection (default is 20 ms)
@@ -73,6 +74,26 @@ headtrackr.Tracker = function(params) {
 		this.status = message;
 	}.bind(this);
 	
+	var insertAltVideo = function(video) {
+	  if (params.altVideo !== undefined) {
+        if (supports_video()) {
+          if (params.altVideo.ogv && supports_ogg_theora_video()) {
+            video.src = params.altVideo.ogv;
+          } else if (params.altVideo.mp4 && supports_h264_baseline_video()) {
+            video.src = params.altVideo.mp4;
+          } else if (params.altVideo.webm && supports_webm_video()) {
+            video.src = params.altVideo.webm;
+          } else {
+            return false;
+          }
+          video.play();
+          return true;
+        }
+      } else {
+        return false;
+      }
+	}
+	
 	this.init = function(video, canvas) {
     navigator.getUserMedia = navigator.getUserMedia || navigator.webkitGetUserMedia || navigator.mozGetUserMedia || navigator.msGetUserMedia;
 		window.URL = window.URL || window.webkitURL || window.msURL || window.mozURL;
@@ -95,20 +116,13 @@ headtrackr.Tracker = function(params) {
 				video.play();
 			}, function() {
 				headtrackerStatus("no camera");
-				if (params.altVideo !== undefined) {
-					video.src = params.altVideo;
-					video.play();
-				}
+				insertAltVideo(video);
 			});
 		} else {
 			headtrackerStatus("no getUserMedia");
-			
-			if (params.altVideo !== undefined) {
-				video.src = params.altVideo;
-				video.play();
-			} else {
-				return false;
-			}
+			if (!insertAltVideo(video)) {
+			  return false;
+            }
 		}
 		
 		videoElement = video;
@@ -365,3 +379,27 @@ if (!Function.prototype.bind) {
 		return fBound;	
 	};	
 }	 
+
+// video support utility functions
+
+function supports_video() {
+  return !!document.createElement('video').canPlayType;
+}
+
+function supports_h264_baseline_video() {
+  if (!supports_video()) { return false; }
+  var v = document.createElement("video");
+  return v.canPlayType('video/mp4; codecs="avc1.42E01E, mp4a.40.2"');
+}
+
+function supports_ogg_theora_video() {
+  if (!supports_video()) { return false; }
+  var v = document.createElement("video");
+  return v.canPlayType('video/ogg; codecs="theora, vorbis"');
+}
+
+function supports_webm_video() {
+  if (!supports_video()) { return false; }
+  var v = document.createElement("video");
+  return v.canPlayType('video/webm; codecs="vp8, vorbis"');
+}
