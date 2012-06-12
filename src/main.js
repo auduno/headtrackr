@@ -80,8 +80,16 @@ headtrackr.Tracker = function(params) {
 		if (navigator.getUserMedia) {
 		  headtrackerStatus("getUserMedia");
 		  
+		  var videoSelector = {video : true};
+		  if (window.navigator.appVersion.match(/Chrome\/(.*?) /)) {
+		    var chromeVersion = parseInt(window.navigator.appVersion.match(/Chrome\/(\d+)\./)[1], 10);
+		    if (chromeVersion < 20) {
+		      videoSelector = "video";
+		    }
+		  };
+		  
 			// set up stream
-			navigator.getUserMedia({video: true}, function( stream ) {
+			navigator.getUserMedia(videoSelector, function( stream ) {
 				headtrackerStatus("camera found");
 				video.src = window.URL.createObjectURL(stream);
 				video.play();
