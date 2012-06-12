@@ -71,7 +71,7 @@ headtrackr.controllers.three.realisticAbsoluteCameraControl = function(camera, s
  * Controls a THREE.js camera to create pseudo-3D effect
  *
  * Places "screen" in 3d-model in relation to original cameraposition at any given time
- * Currently not sure if this works properly
+ * Currently not sure if this works properly, or at all
  *
  * @param {THREE.PerspectiveCamera} camera
  * @param {number} scaling The scaling of the "screen" in the 3d model. 

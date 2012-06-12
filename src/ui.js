@@ -20,6 +20,7 @@ headtrackr.Ui = function() {
 	d.style.color = "#777";
 	d.style.position = "absolute";
 	d.style.fontFamily = "Helvetica, Arial, sans-serif";
+	d.style.zIndex = '100002';
 	
 	d2.style.marginLeft = "auto";
 	d2.style.marginRight = "auto";
@@ -34,7 +35,12 @@ headtrackr.Ui = function() {
 	d.appendChild(d2);
 	document.body.appendChild(d);
   
-  statusMessages = {
+  var supportMessages = {
+    "no getUserMedia" : "getUserMedia is not supported in your browser :(",
+    "no camera" : "no camera found :("
+  };
+  
+  var statusMessages = {
     "whitebalance" : "Waiting for camera whitebalancing",
     "detecting" : "Please wait while camera is detecting your face...",
     "hints" : "We seem to have some problems detecting your face. Please make sure that your face is well and evenly lighted, and that your camera is working.",
@@ -43,13 +49,24 @@ headtrackr.Ui = function() {
     "found" : "Face found! Move your head!"
   };
   
+  var override = false;
+  
 	// function to call messages (and to fade them out after a time)
   document.addEventListener("headtrackrStatus", function(event) {
     if (event.status in statusMessages) {
       window.clearTimeout(timeout);
+		  if (!override) {
+		    var messagep = document.getElementById('headtrackerMessage');
+		    messagep.innerHTML = statusMessages[event.status];
+		    timeout = window.setTimeout(function() {messagep.innerHTML = ''; }, 3000);
+		  }
+		} else if (event.status in supportMessages) {
+		  override = true;
+		  window.clearTimeout(timeout);
 		  var messagep = document.getElementById('headtrackerMessage');
-		  messagep.innerHTML = statusMessages[event.status];
-		  timeout = window.setTimeout(function() {messagep.innerHTML = ''; }, 3000);
+		  messagep.innerHTML = supportMessages[event.status];
+		  window.setTimeout(function() {messagep.innerHTML = 'added fallback video for demo'; }, 2000);
+		  window.setTimeout(function() {messagep.innerHTML = '';override = false;}, 4000);
 		}
   }, true);
 	
