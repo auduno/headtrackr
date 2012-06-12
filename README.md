@@ -7,13 +7,9 @@ For a demonstration see [this video]() or try out some of the examples with a la
 
 ### Examples ###
 
-Canvas:
-
+[![facetracking](https://dl.dropbox.com/u/10557805/media/facetracking_thumbnail.png)](https://dl.dropbox.com/u/10557805/facetracking.html)
 [![sprites](https://dl.dropbox.com/u/10557805/media/sprites_thumbnail.png)](https://dl.dropbox.com/u/10557805/sprites_canvas.html)
-[![cube](https://dl.dropbox.com/u/10557805/media/cube_thumbnail.png)](https://dl.dropbox.com/u/10557805/cube.html)
-
-WebGL:
-
+[![facekat](https://dl.dropbox.com/u/10557805/media/facekat_thumbnail.png)](http://www.shinydemos.com/facekat/)
 [![targets](https://dl.dropbox.com/u/10557805/media/targets_thumbnail.png)](https://dl.dropbox.com/u/10557805/targets.html)
 
 ### Usage ###
