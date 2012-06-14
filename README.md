@@ -7,14 +7,14 @@ For a demonstration see [this video](https://vimeo.com/44007600) or try out some
 
 ### Examples ###
 
-[![facetracking](https://dl.dropbox.com/u/10557805/media/facetracking_thumbnail.png)](https://dl.dropbox.com/u/10557805/facetracking.html)
-[![sprites](https://dl.dropbox.com/u/10557805/media/sprites_thumbnail.png)](https://dl.dropbox.com/u/10557805/sprites_canvas.html)
-[![facekat](https://dl.dropbox.com/u/10557805/media/facekat_thumbnail.png)](http://www.shinydemos.com/facekat/)
-[![targets](https://dl.dropbox.com/u/10557805/media/targets_thumbnail.png)](https://dl.dropbox.com/u/10557805/targets.html)
+[![facetracking](http://auduno.github.com/headtrackr/examples/media/facetracking_thumbnail.png)](http://auduno.github.com/headtrackr/examples/facetracking.html)
+[![sprites](http://auduno.github.com/headtrackr/examples/media/sprites_thumbnail.png)](http://auduno.github.com/headtrackr/examples/sprites_canvas.html)
+[![facekat](http://auduno.github.com/headtrackr/examples/media/facekat_thumbnail.png)](http://www.shinydemos.com/facekat/)
+[![targets](http://auduno.github.com/headtrackr/examples/media/targets_thumbnail.png)](http://auduno.github.com/headtrackr/examples/targets.html)
 
 ### Usage ###
 
-Download the minified library [headtrackr.js](https://github.com/auduno/headtrackr/build/headtrackr.js) and include it in your webpage.
+Download the minified library [headtrackr.js](https://github.com/auduno/headtrackr/raw/master/headtrackr.js) and include it in your webpage.
 
 ```html
 <script src="js/headtrackr.js"></script>
@@ -39,7 +39,7 @@ When the headtracker is started, this will now regularly generate the events *he
 
 You can now either create an eventlistener to handle these events somehow, or, if you're using [three.js](https://github.com/mrdoob/three.js/), try to use one of the pre-packaged controllers in this library to create pseudo-3D, aka [head-coupled perspective](http://en.wikipedia.org/wiki/Head-coupled_perspective) effects.
 
-To get some more idea about usage look at the source code for the examples above or have a look at [an overview here](http://.).
+To get some more idea about usage look at the source code for the examples above.
 
 ### License ###
 
