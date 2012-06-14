@@ -1,0 +1,197 @@
+<!doctype html>
+<html lang="en">
+	<head>
+		<title>camshift</title>
+		<meta charset="utf-8">
+		<meta http-equiv="X-UA-Compatible" content="IE=Edge"/>
+		<style>
+			body {
+				background-color: #f0f0f0;
+				margin-left: 10%;
+				margin-right: 10%;
+				margin-top: 5%;
+				width: 40%;
+				overflow: hidden;
+				font-family: "Helvetica", Arial, Serif;
+				position: relative;
+			}
+		</style>
+		<script src="./js/camshift.js"></script>
+		<script src="./js/jquery.min.js"></script>
+		<script src="./js/jquery.imgareaselect.pack.js"></script>
+		<link rel="stylesheet" type="text/css" href="./css/imgareaselect-default.css" />
+		<script type="text/javascript">
+
+      var _gaq = _gaq || [];
+      _gaq.push(['_setAccount', 'UA-32642923-1']);
+      _gaq.push(['_trackPageview']);
+
+      (function() {
+        var ga = document.createElement('script'); ga.type = 'text/javascript'; ga.async = true;
+        ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
+        var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
+      })();
+
+    </script>
+	</head>
+	<body>
+		
+		<canvas id="compare" width="320" height="240" style="display:none"></canvas>
+		<video id="vid" autoplay loop width="320" height="240"></video>
+		<canvas id="overlay" width="320" height="240"></canvas>
+		
+		<p id='gUMMessage'></p>
+		<p>Select an object in the video to track, preferably an object which is colored differently from the rest of the scene.</p>
+		
+		<script>
+			var cstracker;
+			var videoInput = document.getElementById('vid');
+			var canvasInput = document.getElementById('compare');
+			var canvasContext = canvasInput.getContext('2d');
+			var canvasOverlay = document.getElementById('overlay')
+			var overlayContext = canvasOverlay.getContext('2d');
+			
+			// requestAnimationFrame shim
+			(function() {
+					var lastTime = 0;
+					var vendors = ['ms', 'moz', 'webkit', 'o'];
+					for(var x = 0; x < vendors.length && !window.requestAnimationFrame; ++x) {
+							window.requestAnimationFrame = window[vendors[x]+'RequestAnimationFrame'];
+							window.cancelRequestAnimationFrame = window[vendors[x]+
+								'CancelRequestAnimationFrame'];
+					}
+
+					if (!window.requestAnimationFrame)
+							window.requestAnimationFrame = function(callback, element) {
+									var currTime = new Date().getTime();
+									var timeToCall = Math.max(0, 16 - (currTime - lastTime));
+									var id = window.setTimeout(function() { callback(currTime + timeToCall); }, 
+										timeToCall);
+									lastTime = currTime + timeToCall;
+									return id;
+							};
+
+					if (!window.cancelAnimationFrame)
+							window.cancelAnimationFrame = function(id) {
+									clearTimeout(id);
+							};
+			}())	
+			
+			canvasOverlay.style.position = "absolute";
+			canvasOverlay.style.top = '0px';
+			canvasOverlay.style.zIndex = '100001';
+			canvasOverlay.style.display = 'block';
+						
+			// video support utility functions
+			
+			function supports_video() {
+				return !!document.createElement('video').canPlayType;
+			}
+
+			function supports_h264_baseline_video() {
+				if (!supports_video()) { return false; }
+				var v = document.createElement("video");
+				return v.canPlayType('video/mp4; codecs="avc1.42E01E, mp4a.40.2"');
+			}
+
+			function supports_ogg_theora_video() {
+				if (!supports_video()) { return false; }
+				var v = document.createElement("video");
+				return v.canPlayType('video/ogg; codecs="theora, vorbis"');
+			}
+			
+			// set up fallback video
+			
+			var insertAltVideo = function(video) {
+				if (supports_video()) {
+					if (supports_ogg_theora_video()) {
+						video.src = "./media/capture4.ogv";
+					} else if (supports_h264_baseline_video()) {
+						video.src = "./media/capture4.mp4";
+					} else {
+						return false;
+					}
+					video.play();
+					return true;
+				} else return false;
+			}
+					
+			navigator.getUserMedia = navigator.getUserMedia || navigator.webkitGetUserMedia || navigator.mozGetUserMedia || navigator.msGetUserMedia;
+			window.URL = window.URL || window.webkitURL || window.msURL || window.mozURL;
+			// check for camerasupport
+			if (navigator.getUserMedia) {
+				// set up stream
+				
+				var videoSelector = {video : true};
+				if (window.navigator.appVersion.match(/Chrome\/(.*?) /)) {
+					var chromeVersion = parseInt(window.navigator.appVersion.match(/Chrome\/(\d+)\./)[1], 10);
+					if (chromeVersion < 20) {
+						videoSelector = "video";
+					}
+				};
+				
+				navigator.getUserMedia({video: true}, function( stream ) {
+					videoInput.src = window.URL.createObjectURL(stream);
+					videoInput.play();
+				}, function() {
+					insertAltVideo(videoInput);
+					var messagep = document.getElementById('gUMMessage');
+					messagep.innerHTML = "No camera found. Using fallback video.";
+				});
+			} else {
+			  insertAltVideo(videoInput);
+			  var messagep = document.getElementById('gUMMessage');
+			  messagep.innerHTML = "Unfortunately, <a href='http://dev.w3.org/2011/webrtc/editor/getusermedia.html'>getUserMedia</a> is not supported in your browser. Try <a href='http://www.opera.com/browser/'>downloading Opera 12</a> or <a href='http://caniuse.com/stream'>another browser that supports getUserMedia</a>. Now using fallback video.";
+			}
+			
+			// select object to track with mouse
+			
+			$(document).ready(function() {
+				$('#overlay').imgAreaSelect({
+					autoHide: true,
+					onSelectEnd: function(img, selection) {
+						window.cancelAnimationFrame();
+						camshiftTracking(selection.x1, selection.y1, selection.width, selection.height);
+					}
+				});
+			});
+			
+			
+			// once selected, start camshift tracker
+			
+			function camshiftTracking(x, y, width, height) {
+				//copy video to canvas
+				canvasContext.drawImage(videoInput, 0, 0, canvasInput.width, canvasInput.height);
+				cstracker = new headtrackr.camshift.Tracker();
+				cstracker.initTracker(canvasInput, new headtrackr.camshift.Rectangle(x, y, width, height));
+				animate();
+			}
+			
+			// get canvas and draw rectangle around tracked object
+			
+			function animate() {
+				// check if we should schedule a new event
+				window.requestAnimationFrame(animate);
+				
+				//copy video to canvas
+				canvasContext.drawImage(videoInput, 0, 0, canvasInput.width, canvasInput.height);
+				
+				// get tracking
+				cstracker.track(canvasInput);
+				
+				// get position of found object
+				var currentPos = cstracker.getTrackObj();
+				
+				// draw rectangle around object on canvas
+				overlayContext.strokeStyle = "#00CC00";
+				overlayContext.clearRect(0,0,320,240);
+				overlayContext.translate(currentPos.x, currentPos.y)
+				overlayContext.rotate(currentPos.angle-(Math.PI/2));
+				overlayContext.strokeRect((-(currentPos.width/2)) >> 0, (-(currentPos.height/2)) >> 0, currentPos.width, currentPos.height);
+				overlayContext.rotate((Math.PI/2)-currentPos.angle);
+				overlayContext.translate(-currentPos.x, -currentPos.y);
+			}
+			
+		</script>
+	</body>
+</html>
