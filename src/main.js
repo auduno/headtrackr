@@ -12,7 +12,7 @@
  * Optional parameters:
  *	ui {boolean} : whether to create messageoverlay with messages like "found face" (default is true)
  *	altVideo {object} : urls to any alternative videos, if camera is not found or not supported
- *      the format is : {'ogv' : 'somevideo.ogv', 'mp4' : 'somevideo.mp4', 'webm' : 'somevideo.webm'}
+ *		the format is : {'ogv' : 'somevideo.ogv', 'mp4' : 'somevideo.mp4', 'webm' : 'somevideo.webm'}
  *	smoothing {boolean} : whether to use smoothing (default is true)
  *	debug {canvas} : pass along a canvas to paint output of facedetection, for debugging
  *	detectionInterval {number} : time we wait before doing a new facedetection (default is 20 ms)
@@ -65,50 +65,57 @@ headtrackr.Tracker = function(params) {
 	
 	this.status = "";
 	
-  var statusEvent = document.createEvent("Event");
-  statusEvent.initEvent("headtrackrStatus", true, true);
+	var statusEvent = document.createEvent("Event");
+	statusEvent.initEvent("headtrackrStatus", true, true);
 	
 	var headtrackerStatus = function(message) {
-	  statusEvent.status = message;
+		statusEvent.status = message;
 		document.dispatchEvent(statusEvent);
 		this.status = message;
 	}.bind(this);
 	
 	var insertAltVideo = function(video) {
-	  if (params.altVideo !== undefined) {
-        if (supports_video()) {
-          if (params.altVideo.ogv && supports_ogg_theora_video()) {
-            video.src = params.altVideo.ogv;
-          } else if (params.altVideo.mp4 && supports_h264_baseline_video()) {
-            video.src = params.altVideo.mp4;
-          } else if (params.altVideo.webm && supports_webm_video()) {
-            video.src = params.altVideo.webm;
-          } else {
-            return false;
-          }
-          video.play();
-          return true;
-        }
-      } else {
-        return false;
-      }
+		if (params.altVideo !== undefined) {
+			if (supports_video()) {
+				if (params.altVideo.ogv && supports_ogg_theora_video()) {
+					video.src = params.altVideo.ogv;
+				} else if (params.altVideo.mp4 && supports_h264_baseline_video()) {
+					video.src = params.altVideo.mp4;
+				} else if (params.altVideo.webm && supports_webm_video()) {
+					video.src = params.altVideo.webm;
+				} else {
+					return false;
+				}
+				video.play();
+				return true;
+			}
+		} else {
+			return false;
+		}
 	}
 	
 	this.init = function(video, canvas) {
-    navigator.getUserMedia = navigator.getUserMedia || navigator.webkitGetUserMedia || navigator.mozGetUserMedia || navigator.msGetUserMedia;
+		navigator.getUserMedia = navigator.getUserMedia || navigator.webkitGetUserMedia || navigator.mozGetUserMedia || navigator.msGetUserMedia;
 		window.URL = window.URL || window.webkitURL || window.msURL || window.mozURL;
 		// check for camerasupport
 		if (navigator.getUserMedia) {
-		  headtrackerStatus("getUserMedia");
-		  
-		  var videoSelector = {video : true};
-		  if (window.navigator.appVersion.match(/Chrome\/(.*?) /)) {
-		    var chromeVersion = parseInt(window.navigator.appVersion.match(/Chrome\/(\d+)\./)[1], 10);
-		    if (chromeVersion < 20) {
-		      videoSelector = "video";
-		    }
-		  };
-		  
+			headtrackerStatus("getUserMedia");
+			
+			// chrome 19 shim
+			var videoSelector = {video : true};
+			if (window.navigator.appVersion.match(/Chrome\/(.*?) /)) {
+				var chromeVersion = parseInt(window.navigator.appVersion.match(/Chrome\/(\d+)\./)[1], 10);
+				if (chromeVersion < 20) {
+					videoSelector = "video";
+				}
+			};
+			
+			// opera shim
+			if (window.opera) {
+				window.URL = window.URL || {};
+				if (!window.URL.createObjectURL) window.URL.createObjectURL = function(obj) {return obj;};
+			}
+			
 			// set up stream
 			navigator.getUserMedia(videoSelector, function( stream ) {
 				headtrackerStatus("camera found");
@@ -121,8 +128,8 @@ headtrackr.Tracker = function(params) {
 		} else {
 			headtrackerStatus("no getUserMedia");
 			if (!insertAltVideo(video)) {
-			  return false;
-            }
+				return false;
+			}
 		}
 		
 		videoElement = video;
@@ -162,21 +169,21 @@ headtrackr.Tracker = function(params) {
 		// track face
 		facetracker.track()
 		var faceObj = facetracker.getTrackingObject({debug : params.debug});
-    
+		
 		if (faceObj.detection == "WB") headtrackerStatus("whitebalance");
 		if (firstRun && faceObj.detection == "VJ") headtrackerStatus("detecting");
 		
 		// check if we have a detection first
 		if (!(faceObj.confidence == 0)) {
 			if (faceObj.detection == "VJ") {
-			  if (detectionTimer === undefined) {
-			    // start timing
-			    detectionTimer = (new Date).getTime();
-			  }
-			  if (((new Date).getTime() - detectionTimer) > 5000) {
-			    headtrackerStatus("hints");
-			  }
-			  
+				if (detectionTimer === undefined) {
+					// start timing
+					detectionTimer = (new Date).getTime();
+				}
+				if (((new Date).getTime() - detectionTimer) > 5000) {
+					headtrackerStatus("hints");
+				}
+				
 				var x = (faceObj.x + faceObj.width/2); //midpoint
 				var y = (faceObj.y + faceObj.height/2); //midpoint
 				
@@ -204,8 +211,8 @@ headtrackr.Tracker = function(params) {
 				
 				// fade out video if it's showing
 				if (!videoFaded && params.fadeVideo) {
-				  fadeVideo();
-				  videoFaded = true;
+					fadeVideo();
+					videoFaded = true;
 				}
 				
 				this.status = 'tracking';
@@ -222,17 +229,17 @@ headtrackr.Tracker = function(params) {
 						headposition = undefined;
 						
 						// show video again if it's not already showing
-            if (videoFaded) {
-              videoElement.style.opacity = 1;
-              videoFaded = false;
-            }
+						if (videoFaded) {
+							videoElement.style.opacity = 1;
+							videoFaded = false;
+						}
 					} else {
-					  headtrackerStatus("lost");
+						headtrackerStatus("lost");
 						this.stop();
 					}
 				} else {
 					if (!faceFound) {
-					  headtrackerStatus("found");
+						headtrackerStatus("found");
 						faceFound = true;
 					}
 					
@@ -246,41 +253,41 @@ headtrackr.Tracker = function(params) {
 					
 					// get headposition
 					if (headposition === undefined && params.headPosition) {
-            // wait until headdiagonal is stable before initializing headposition
-            var stable = false;
-            
-            // calculate headdiagonal
-            var headdiag = Math.sqrt(faceObj.width*faceObj.width + faceObj.height*faceObj.height);
-            
-            //console.log(headdiag);
-            
-            if (headDiagonal.length < 6) {
-              headDiagonal.push(headdiag);
-            } else {
-              headDiagonal.splice(0,1);
-              headDiagonal.push(headdiag);
-              if ((Math.max.apply(null, headDiagonal) - Math.min.apply(null, headDiagonal)) < 5) {
-                stable = true;
-              }
-            }
-            
-            if (stable) {
-              if (firstRun) {
-                if (params.fov === undefined) {
-                  headposition = new headtrackr.headposition.Tracker(faceObj, canvasElement.width, canvasElement.height, {distance_from_camera_to_screen : params.cameraOffset});
-                } else {
-                  headposition = new headtrackr.headposition.Tracker(faceObj, canvasElement.width, canvasElement.height, {fov : params.fov, distance_from_camera_to_screen : params.cameraOffset});
-                }
-                fov = headposition.getFOV();
-                firstRun = false;
-              } else {
-                headposition = new headtrackr.headposition.Tracker(faceObj, canvasElement.width, canvasElement.height, {fov : fov, distance_from_camera_to_screen : params.cameraOffset});
-              }
-              headposition.track(faceObj);
+						// wait until headdiagonal is stable before initializing headposition
+						var stable = false;
+						
+						// calculate headdiagonal
+						var headdiag = Math.sqrt(faceObj.width*faceObj.width + faceObj.height*faceObj.height);
+						
+						//console.log(headdiag);
+						
+						if (headDiagonal.length < 6) {
+							headDiagonal.push(headdiag);
+						} else {
+							headDiagonal.splice(0,1);
+							headDiagonal.push(headdiag);
+							if ((Math.max.apply(null, headDiagonal) - Math.min.apply(null, headDiagonal)) < 5) {
+								stable = true;
+							}
+						}
+						
+						if (stable) {
+							if (firstRun) {
+								if (params.fov === undefined) {
+									headposition = new headtrackr.headposition.Tracker(faceObj, canvasElement.width, canvasElement.height, {distance_from_camera_to_screen : params.cameraOffset});
+								} else {
+									headposition = new headtrackr.headposition.Tracker(faceObj, canvasElement.width, canvasElement.height, {fov : params.fov, distance_from_camera_to_screen : params.cameraOffset});
+								}
+								fov = headposition.getFOV();
+								firstRun = false;
+							} else {
+								headposition = new headtrackr.headposition.Tracker(faceObj, canvasElement.width, canvasElement.height, {fov : fov, distance_from_camera_to_screen : params.cameraOffset});
+							}
+							headposition.track(faceObj);
 						}
 					} else if (params.headPosition) {
-            headposition.track(faceObj);
-          }
+						headposition.track(faceObj);
+					}
 				}
 			}
 		}
@@ -291,18 +298,18 @@ headtrackr.Tracker = function(params) {
 	}.bind(this);
 	
 	var starter = function() {
-    // in some cases, the video sends events before starting to draw
+		// in some cases, the video sends events before starting to draw
 		// so check that we have something on video before starting to track
-    
-    // Copy video to canvas
-    canvasContext.drawImage(videoElement, 0, 0, canvasElement.width, canvasElement.height);
+		
+		// Copy video to canvas
+		canvasContext.drawImage(videoElement, 0, 0, canvasElement.width, canvasElement.height);
 		
 		var canvasContent = headtrackr.getWhitebalance(canvasElement);
 		if (canvasContent > 0) {
-		  run = true;
-      track();
+			run = true;
+			track();
 		} else {
-      window.setTimeout(starter, 100);
+			window.setTimeout(starter, 100);
 		}
 	}
 	
@@ -318,9 +325,9 @@ headtrackr.Tracker = function(params) {
 			videoElement.addEventListener('playing', starter, false);
 			
 			return true;
-		} else {		  
-      starter();
-    }
+		} else {			
+			starter();
+		}
 		
 		return true;
 	}
@@ -341,15 +348,15 @@ headtrackr.Tracker = function(params) {
 	
 	// fade out videoElement
 	var fadeVideo = function() {
-	  if (videoElement.style.opacity == "") {
-	    videoElement.style.opacity = 0.98;
-	    window.setTimeout(fadeVideo, 50);
-	  } else if (videoElement.style.opacity > 0.30) {
-	    videoElement.style.opacity -= 0.02;
-	    window.setTimeout(fadeVideo, 50);
-	  } else {
-	    videoElement.style.opacity = 0.3;
-	  }
+		if (videoElement.style.opacity == "") {
+			videoElement.style.opacity = 0.98;
+			window.setTimeout(fadeVideo, 50);
+		} else if (videoElement.style.opacity > 0.30) {
+			videoElement.style.opacity -= 0.02;
+			window.setTimeout(fadeVideo, 50);
+		} else {
+			videoElement.style.opacity = 0.3;
+		}
 	}
 };
 
@@ -383,23 +390,23 @@ if (!Function.prototype.bind) {
 // video support utility functions
 
 function supports_video() {
-  return !!document.createElement('video').canPlayType;
+	return !!document.createElement('video').canPlayType;
 }
 
 function supports_h264_baseline_video() {
-  if (!supports_video()) { return false; }
-  var v = document.createElement("video");
-  return v.canPlayType('video/mp4; codecs="avc1.42E01E, mp4a.40.2"');
+	if (!supports_video()) { return false; }
+	var v = document.createElement("video");
+	return v.canPlayType('video/mp4; codecs="avc1.42E01E, mp4a.40.2"');
 }
 
 function supports_ogg_theora_video() {
-  if (!supports_video()) { return false; }
-  var v = document.createElement("video");
-  return v.canPlayType('video/ogg; codecs="theora, vorbis"');
+	if (!supports_video()) { return false; }
+	var v = document.createElement("video");
+	return v.canPlayType('video/ogg; codecs="theora, vorbis"');
 }
 
 function supports_webm_video() {
-  if (!supports_video()) { return false; }
-  var v = document.createElement("video");
-  return v.canPlayType('video/webm; codecs="vp8, vorbis"');
+	if (!supports_video()) { return false; }
+	var v = document.createElement("video");
+	return v.canPlayType('video/webm; codecs="vp8, vorbis"');
 }
