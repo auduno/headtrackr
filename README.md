@@ -39,7 +39,7 @@ When the headtracker is started, this will now regularly generate the events *he
 
 You can now either create an eventlistener to handle these events somehow, or, if you're using [three.js](https://github.com/mrdoob/three.js/), try to use one of the pre-packaged controllers in this library to create pseudo-3D, aka [head-coupled perspective](http://en.wikipedia.org/wiki/Head-coupled_perspective) effects.
 
-To get some more idea about usage look at the source code for the examples above.
+To get some more idea about usage look at the source code for the examples above, or have a look at [this overview](http://auduno.tumblr.com/post/25125149521/head-tracking-with-webrtc).
 
 ### License ###
 
