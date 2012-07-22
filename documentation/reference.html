@@ -1,0 +1,167 @@
+<!doctype html>
+<html>
+<head>
+<meta charset="utf-8">
+<title>Reference</title>
+<link rel="stylesheet" href="./styles/styles.css">
+<link rel="stylesheet" href="./styles/coderay.css">
+<script src="./javascripts/scale.fix.js"></script>
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/1.7.2/jquery.min.js"></script>
+<script src="./javascripts/slimbox2.js"></script>
+<link rel="stylesheet" href="./styles/slimbox2.css" type="text/css" media="screen" />
+<meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no">
+<meta http-equiv="X-UA-Compatible" content="chrome=1">
+<!--[if lt IE 9]>
+<script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script>
+<![endif]-->
+</head>
+<body>
+<div class="wrapper">
+<header>
+<h1>
+<a href="http://github.com/auduno/headtrackr/">headtrackr.js</a></h1>
+<p>Javascript library for headtracking via webcam and WebRTC/getUserMedia</p>
+<p class="view">
+<a href="https://github.com/auduno/headtrackr">View the Project on GitHub <small>auduno/headtrackr</small></a></p>
+<ul>
+<li><a href="https://github.com/auduno/headtrackr/zipball/master">Download <strong>ZIP File</strong></a></li>
+<li><a href="https://github.com/auduno/headtrackr/tarball/master">Download <strong>TAR Ball</strong></a></li>
+<li><a href="https://github.com/auduno/headtrackr">Fork On <strong>GitHub</strong></a></li>
+</ul>
+</header>
+<section>
+<h1>Library Reference</h1>
+
+<h2 id="process">Flow</h2>
+
+<p>This is the rough process that will happen on regular intervals once headtrackr is started. On initialization we will also check whether getUserMedia is supported and if we are able to stream from a camera at all.</p>
+
+<p style="text-align:center"><a href="./flowfig1d.png" rel="lightbox" title="Flow"><img src="./flowfig1d.png" width="400px" height="397px"></img></a></p>
+
+<h2 id="events">Events</h2>
+
+<p>Once started, <em>headtrackr.js</em> produces three types of events on the document. <em>headtrackrStatus</em> is triggered on any changes in status, such as when the face is detected, when tracking of the face is lost, and similar. <em>facetrackerEvent</em> is triggered every 20 ms (depending on detection interval), and gives us the position of the face on the canvas. <em>headtrackerEvent</em> is also triggered every 20 ms, and gives us the calculated position of the head relative to the camera. Note that these two events will first be triggered when the face is detected and tracked. Details of what properties each event passes along are below, and actions can be triggered by any of these events in the standard way:</p>
+
+<pre><code>document.addEventListener('headtrackrStatus', 
+  function (event) {
+    if (event.status == "getUserMedia) {
+      alert("getUserMedia is supported!");
+    }
+  }
+);
+</code></pre>
+
+<p><strong>headtrackrStatus</strong>:</p>
+
+<ul>
+<li><em>status</em> : status of headtracking. Can have these values:
+<ul>
+  <li><em>"getUserMedia"</em> : getUserMedia seems to be supported</li>
+  <li><em>"no getUserMedia"</em> : getUserMedia seems not to be supported</li>
+  <li><em>"camera found"</em> : camera found and allowed to stream</li>
+  <li><em>"no camera"</em> : camera not found, or streaming not allowed, or getUserMedia setup failed</li>
+  <li><em>"whitebalance"</em> : initialized detection of graylevels</li>
+  <li><em>"detecting"</em> : initialized detection of face</li>
+  <li><em>"hints"</em> : detecting the face took more than 5 seconds</li>
+  <li><em>"found"</em> : face detected, tracking initialized</li>
+  <li><em>"lost"</em> : lost tracking of face</li>
+  <li><em>"redetecting"</em> : trying to redetect face</li>
+  <li><em>"stopped"</em> : face tracking was stopped</li>
+</ul>
+</li>
+</ul>
+
+<p><strong>facetrackingEvent</strong>:</p>
+
+<ul>
+  <li><em>height</em> : height of face on canvas</li>
+  <li><em>width</em> : width of face on canvas</li>
+  <li><em>angle</em> : angle of face on canvas (in radians). The angle is calculated in normal counter-clockwise direction. I.e. if head is upright, this will return &pi;/2, if head is tilted towards right (as seen on canvas), this will return a degree between 0 and &pi;/2. Note that this is only calculated if "calcAngles" is enabled via parameters, default is that this is not enabled. When "calcAngles" is not enabled, this will always return &pi;/2, i.e. 90°.</li>
+  <li><em>x</em> : x-position of center of face on canvas</li>
+  <li><em>y</em> : y-position of center of face on canvas</li>
+  <li><em>confidence</em> : confidence in the detection (will only give a value for detection, not tracking)</li>
+  <li><em>detection</em> : type of detection/tracking, either "VJ" for Viola-Jones or "CS" for Camshift</li>
+  <li><em>time</em> : How long time it took to calculate this position (for debugging only)</li>
+</ul>
+
+<p><strong>headtrackingEvent</strong>:</p>
+
+<ul>
+  <li><em>x</em> : position of head in cm's right of camera as seen from users point of view (see figure)</li>
+  <li><em>y</em> : position of head in cm's above camera (see figure)</li>
+  <li><em>z</em> : position of head in cm's distance from camera (see figure)</li>
+</ul>
+
+<p style="text-align:center"><img src="./camorient1.png"></img></p>
+
+<h2 id="parameters">Parameters</h2>
+
+<p>When initializing the objects <em>headtrackr.Tracker</em>, <em>headtrackr.facetracker.Tracker</em> or <em>headtrackr.camshift.Tracker</em>, you can optionally specify some parameters, for instance:</p>
+
+<pre><code>var ht = new headtrackr.Tracker({ui : true, headPosition : false});</code></pre>
+
+<p>The optional parameters that can be passed along to headtrackr.Tracker are :</p>
+
+<ul>
+<li><strong>ui</strong> {<em>boolean</em>} : whether to create messageoverlay with messages like "found face" (default is true)</li>
+<li><strong>altVideo</strong> {<em>object</em>} : urls to any alternative videos, if camera is not found or not supported. The format is : {'ogv' : 'somevideo.ogv', 'mp4' : 'somevideo.mp4', 'webm' : 'somevideo.webm'}</li>
+<li><strong>smoothing</strong> {<em>boolean</em>} : whether to use smoothing (default is true)</li>
+<li><strong>debug</strong> {<em>canvas element</em>} : pass along a canvas to paint output of facedetection, for debugging</li>
+<li><strong>detectionInterval</strong> {<em>number</em>} : time we wait before doing a new facedetection (default is 20 ms)</li>
+<li><strong>retryDetection</strong> {<em>boolean</em>} : whether to start facedetection again if we lose track of face (default is true)</li>
+<li><strong>fov</strong> {<em>number</em>} : horizontal field of view of used camera in degrees (default is to estimate this)</li>
+<li><strong>fadeVideo</strong> {<em>boolean</em>} : whether to fade out video when face is detected (default is false)</li>
+<li><strong>cameraOffset</strong> {<em>number</em>} : distance from camera to center of screen, used to offset position of head (default is 11.5)</li>
+<li><strong>calcAngles</strong> {<em>boolean</em>} : whether to calculate angles when doing facetracking (default is false)</li>
+<li><strong>headPosition</strong> {<em>boolean</em>} : whether to calculate headposition (default is true)</li>
+</ul>
+
+<p>The optional parameters to headtrackr.facetrackr.Tracker :</p>
+
+<ul>
+<li><strong>smoothing</strong> {<em>boolean</em>} : whether to use smoothing on output (default is true)</li>
+<li><strong>smoothingInterval</strong> {<em>number</em>} : should be the same as detectionInterval plus time of tracking (default is 35 ms)</li>
+<li><strong>sendEvents</strong> {<em>boolean</em>} : whether to send events (default is true)</li>
+<li><strong>whitebalancing</strong> {<em>boolean</em>} : whether to wait for camera whitebalancing before starting detection (default is true)</li>
+<li><strong>calcAngles</strong> {<em>boolean</em>} : whether to calculate orientation of tracked object (default for facetrackr is false)</li>
+</ul>
+
+<p>Optional parameters to headtrackr.camshift.Tracker :</p>
+
+<ul>
+<li><strong>calcAngles</strong> {<em>boolean</em>} : whether to calculate orientation of tracked object (default for camshift is true)</li>
+</ul>
+
+<h2>Elements</h2>
+
+<p style="text-align:center"><a href="./htfig1b.png" rel="lightbox" title="Elements"><img src="./htfig1b.png" width="400px" height="151px"></img></a></p>
+
+<ul>
+<li><em>ccv.js</em> : generic viola-jones type detection, from <a href="https://github.com/liuliu/ccv">libccv</a></li>
+<li><em>cascade.js</em> : face data model for ccv.js for detecting faces, from <a href="https://github.com/liuliu/ccv">libccv</a></li>
+<li><em>camshift.js</em> : camshift object tracker</li>
+<li><em>facetrackr.js</em> : wrapper around object tracker and face detector. Where most coordination happens</li>
+<li><em>smoother.js</em> : generic time series smoother</li>
+<li><em>headposition.js</em> : calculation of position of head in relation to screen</li>
+<li><em>main.js</em> : wrapper around everything. Where everything is initiated.</li>
+<li><em>controllers.js</em> : optional eventhandlers that create head-coupled perspective based on headtracking events</li>
+<li><em>whitebalance.js</em> : a simple function for calculating graylevel, used for whitebalancing/levels</li>
+<li><em>ui.js</em> : optional element that creates messaging ui on status events</li>
+<li><em>license.js</em> : license</li>
+</ul>
+
+<ul>
+<li><em>headtrackr.js</em> : minified version of library</li>
+</ul>
+
+
+<!--<h3><a href="/">&lsaquo;&nbsp;&nbsp;back&nbsp;</a></h3>-->
+</section>
+<footer>
+<p>This project is maintained by <a href="https://github.com/auduno">auduno</a></p>
+<p><small>Theme originated from <a href="https://github.com/orderedlist">orderedlist</a></small></p>
+</footer>
+</div>
+<!--[if !IE]><script>fixScale(document);</script><!--<![endif]-->
+</body>
+</html>
