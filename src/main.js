@@ -259,8 +259,6 @@ headtrackr.Tracker = function(params) {
 						// calculate headdiagonal
 						var headdiag = Math.sqrt(faceObj.width*faceObj.width + faceObj.height*faceObj.height);
 						
-						//console.log(headdiag);
-						
 						if (headDiagonal.length < 6) {
 							headDiagonal.push(headdiag);
 						} else {
