@@ -43,6 +43,11 @@ You can now either create an eventlistener to handle these events somehow, or, i
 
 To get some more idea about usage look at the source code for the examples above, [this overview](http://auduno.tumblr.com/post/25125149521/head-tracking-with-webrtc), or [the reference](http://auduno.github.com/headtrackr/documentation/reference.html).
 
+### Projects that have used headtrackr ###
+
+[![movembergames](http://auduno.github.com/headtrackr/examples/media/movembergames_thumbnail.png)](http://movembergames.com)
+[![street-facing](http://auduno.github.com/headtrackr/examples/media/street-facing_thumbnail.jpg)](https://github.com/alexhancock/street-facing)
+
 ### License ###
 
 Headtrackr.js is distributed under the [MIT License](http://www.opensource.org/licenses/MIT), and includes some code bits (courtesy [Liu Liu](https://github.com/liuliu) and Benjamin Jung) that are under the [BSD-3 License](http://www.opensource.org/licenses/BSD-3-Clause) and the [MIT License](http://www.opensource.org/licenses/MIT) respectively.
