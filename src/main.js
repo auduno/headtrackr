@@ -28,6 +28,9 @@
 
 var headtrackr = {};
 
+if (typeof exports === 'object')
+    module.exports = headtrackr;
+
 /**
  * @constructor
  */
