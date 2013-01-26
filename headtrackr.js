@@ -1,3 +1,12 @@
+(function (root, factory) {
+    if (typeof exports === 'object') {
+        module.exports = factory();
+    } else if (typeof define === 'function' && define.amd) {
+        define([],factory);
+    } else {
+        root.returnExports = factory();
+    }
+}(this, function () {
 /**
  * Wrapper for headtrackr library
  *
@@ -1944,3 +1953,7 @@ headtrackr.controllers.threerealisticRelativeCameraControl = function(camera, sc
 		
 	}, false);
 }
+
+
+	return headtrackr;
+}));

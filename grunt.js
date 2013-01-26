@@ -3,7 +3,8 @@ module.exports = function(grunt) {
 	grunt.initConfig({
 		concat: {
 			dist: {
-				src: [  'src/main.js',
+				src: [  'src/header.js.txt',
+						'src/main.js',
 						'src/ccv.js',
 						'src/cascade.js',
 						'src/whitebalance.js',
@@ -12,7 +13,8 @@ module.exports = function(grunt) {
 						'src/facetrackr.js',
 						'src/ui.js',
 						'src/headposition.js',
-						'src/controllers.js'],
+						'src/controllers.js',
+						'src/footer.js.txt'],
 				dest: './headtrackr.js'
 			}
 		}, 
