@@ -1,0 +1,13 @@
+{
+  "name": "headtrackr",
+  "description": "headtracking via webcam and WebRTC/getUserMedia",
+  "tags": ["webcam", "headtracking"],
+  "version": "0.0.1",
+  "author": "Audun Mathias Øygard",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/auduno/headtrackr.git"
+  },
+  "bugs": "https://github.com/auduno/headtrackr/issues",
+  "main": "headtrackr.js"
+}
