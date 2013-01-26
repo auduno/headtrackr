@@ -15,7 +15,7 @@ headtrackr.Ui = function() {
 	
 	d.style.left = "20%";
 	d.style.right = "20%";
-	d.style.top = "100px";
+	d.style.top = "30%";
 	d.style.fontSize = "90px";
 	d.style.color = "#777";
 	d.style.position = "absolute";

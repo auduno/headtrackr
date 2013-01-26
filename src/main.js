@@ -27,6 +27,7 @@
  */
 
 var headtrackr = {};
+headtrackr.rev = 2;
 
 /**
  * @constructor
@@ -119,7 +120,11 @@ headtrackr.Tracker = function(params) {
 			// set up stream
 			navigator.getUserMedia(videoSelector, function( stream ) {
 				headtrackerStatus("camera found");
-				video.src = window.URL.createObjectURL(stream);
+				if (video.mozCaptureStream) {
+				  video.mozSrcObject = stream;
+				} else {
+				  video.src = (window.URL && window.URL.createObjectURL(stream)) || stream;
+				}
 				video.play();
 			}, function() {
 				headtrackerStatus("no camera");
@@ -296,19 +301,24 @@ headtrackr.Tracker = function(params) {
 	}.bind(this);
 	
 	var starter = function() {
-		// in some cases, the video sends events before starting to draw
-		// so check that we have something on video before starting to track
+		// does some safety checks before starting
 		
-		// Copy video to canvas
-		canvasContext.drawImage(videoElement, 0, 0, canvasElement.width, canvasElement.height);
-		
-		var canvasContent = headtrackr.getWhitebalance(canvasElement);
-		if (canvasContent > 0) {
-			run = true;
-			track();
-		} else {
-			window.setTimeout(starter, 100);
-		}
+		// sometimes canvasContext is not available yet, so try and catch if it's not there...
+		try {
+      canvasContext.drawImage(videoElement, 0, 0, canvasElement.width, canvasElement.height);
+      
+      // in some cases, the video sends events before starting to draw
+      // so check that we have something on video before starting to track
+      var canvasContent = headtrackr.getWhitebalance(canvasElement);
+      if (canvasContent > 0) {
+        run = true;
+        track();
+      } else {
+        window.setTimeout(starter, 100);
+      }
+    } catch (err) {
+      window.setTimeout(starter, 100);
+    }
 	}
 	
 	this.start = function() {
