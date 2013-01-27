@@ -4,6 +4,6 @@
     } else if (typeof define === 'function' && define.amd) {
         define([],factory);
     } else {
-        root.returnExports = factory();
+        root.headtrackr = factory();
     }
 }(this, function () {

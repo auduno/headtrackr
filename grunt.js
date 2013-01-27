@@ -3,7 +3,9 @@ module.exports = function(grunt) {
 	grunt.initConfig({
 		concat: {
 			dist: {
-				src: [  'src/header.js.txt',
+				src: [
+				    'src/license.js',
+				    'src/header.js.txt',
 						'src/main.js',
 						'src/ccv.js',
 						'src/cascade.js',
