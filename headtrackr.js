@@ -38,6 +38,7 @@
  * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  *
  */
+
 (function (root, factory) {
     if (typeof exports === 'object') {
         module.exports = factory();
@@ -76,6 +77,7 @@
  */
 
 var headtrackr = {};
+headtrackr.rev = 2;
 
 /**
  * @constructor
@@ -349,19 +351,24 @@ headtrackr.Tracker = function(params) {
 	}.bind(this);
 	
 	var starter = function() {
-		// in some cases, the video sends events before starting to draw
-		// so check that we have something on video before starting to track
+		// does some safety checks before starting
 		
-		// Copy video to canvas
-		canvasContext.drawImage(videoElement, 0, 0, canvasElement.width, canvasElement.height);
-		
-		var canvasContent = headtrackr.getWhitebalance(canvasElement);
-		if (canvasContent > 0) {
-			run = true;
-			track();
-		} else {
-			window.setTimeout(starter, 100);
-		}
+		// sometimes canvasContext is not available yet, so try and catch if it's not there...
+		try {
+      canvasContext.drawImage(videoElement, 0, 0, canvasElement.width, canvasElement.height);
+      
+      // in some cases, the video sends events before starting to draw
+      // so check that we have something on video before starting to track
+      var canvasContent = headtrackr.getWhitebalance(canvasElement);
+      if (canvasContent > 0) {
+        run = true;
+        track();
+      } else {
+        window.setTimeout(starter, 100);
+      }
+    } catch (err) {
+      window.setTimeout(starter, 100);
+    }
 	}
 	
 	this.start = function() {
@@ -1585,7 +1592,7 @@ headtrackr.Ui = function() {
 	
 	d.style.left = "20%";
 	d.style.right = "20%";
-	d.style.top = "100px";
+	d.style.top = "30%";
 	d.style.fontSize = "90px";
 	d.style.color = "#777";
 	d.style.position = "absolute";
