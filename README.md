@@ -47,16 +47,11 @@ To get some more idea about usage look at the source code for the examples above
 
 [![movembergames](http://auduno.github.com/headtrackr/examples/media/movembergames_thumbnail.png)](http://movembergames.com)
 [![street-facing](http://auduno.github.com/headtrackr/examples/media/street-facing_thumbnail.jpg)](https://github.com/alexhancock/street-facing)
+[![Real-time responsive typography](http://auduno.github.com/headtrackr/examples/media/responsive_text.png)](http://webdesign.maratz.com/lab/responsivetypography/realtime/)
 
 ### Building from source ###
 
-Make sure you have grunt installed
-
-```npm install -g grunt```
-
-And build
-
-```grunt ```
+Make sure you have [grunt](http://gruntjs.com/) installed and build in src folder with the command ```grunt ```
 
 ### License ###
 
