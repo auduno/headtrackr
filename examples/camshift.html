@@ -75,7 +75,7 @@
 							window.cancelAnimationFrame = function(id) {
 									clearTimeout(id);
 							};
-			}())	
+			}())
 			
 			canvasOverlay.style.position = "absolute";
 			canvasOverlay.style.top = '0px';
@@ -130,8 +130,18 @@
 					}
 				};
 				
-				navigator.getUserMedia({video: true}, function( stream ) {
-					videoInput.src = window.URL.createObjectURL(stream);
+				// opera shim
+                if (window.opera) {
+                    window.URL = window.URL || {};
+                    if (!window.URL.createObjectURL) window.URL.createObjectURL = function(obj) {return obj;};
+                }
+				
+				navigator.getUserMedia(videoSelector, function( stream ) {
+					if (videoInput.mozCaptureStream) {
+                        videoInput.mozSrcObject = stream;
+					} else {
+                        videoInput.src = (window.URL && window.URL.createObjectURL(stream)) || stream;
+                    }
 					videoInput.play();
 				}, function() {
 					insertAltVideo(videoInput);
@@ -150,7 +160,7 @@
 				$('#overlay').imgAreaSelect({
 					autoHide: true,
 					onSelectEnd: function(img, selection) {
-						window.cancelAnimationFrame();
+						window.cancelAnimationFrame(req);
 						camshiftTracking(selection.x1, selection.y1, selection.width, selection.height);
 					}
 				});
@@ -169,9 +179,10 @@
 			
 			// get canvas and draw rectangle around tracked object
 			
+			var req;
 			function animate() {
 				// check if we should schedule a new event
-				window.requestAnimationFrame(animate);
+				req = window.requestAnimationFrame(animate);
 				
 				//copy video to canvas
 				canvasContext.drawImage(videoInput, 0, 0, canvasInput.width, canvasInput.height);
