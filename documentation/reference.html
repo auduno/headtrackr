@@ -40,7 +40,7 @@
 
 <h2 id="events">Events</h2>
 
-<p>Once started, <em>headtrackr.js</em> produces three types of events on the document. <em>headtrackrStatus</em> is triggered on any changes in status, such as when the face is detected, when tracking of the face is lost, and similar. <em>facetrackerEvent</em> is triggered every 20 ms (depending on detection interval), and gives us the position of the face on the canvas. <em>headtrackerEvent</em> is also triggered every 20 ms, and gives us the calculated position of the head relative to the camera. Note that these two events will first be triggered when the face is detected and tracked. Details of what properties each event passes along are below, and actions can be triggered by any of these events in the standard way:</p>
+<p>Once started, <em>headtrackr.js</em> produces three types of events on the document. <em>headtrackrStatus</em> is triggered on any changes in status, such as when the face is detected, when tracking of the face is lost, and similar. <em>facetrackingEvent</em> is triggered every 20 ms (depending on detection interval), and gives us the position of the face on the canvas. <em>headtrackingEvent</em> is also triggered every 20 ms, and gives us the calculated position of the head relative to the camera. Note that these two events will first be triggered when the face is detected and tracked. Details of what properties each event passes along are below, and actions can be triggered by any of these events in the standard way:</p>
 
 <pre><code>document.addEventListener('headtrackrStatus', 
   function (event) {
