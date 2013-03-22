@@ -13,6 +13,7 @@ For a demonstration see [this video](https://vimeo.com/44049736) or try out some
 [![sprites](http://auduno.github.com/headtrackr/examples/media/sprites_thumbnail.png)](http://auduno.github.com/headtrackr/examples/sprites_canvas.html)
 [![facekat](http://auduno.github.com/headtrackr/examples/media/facekat_thumbnail.png)](http://www.shinydemos.com/facekat/)
 [![targets](http://auduno.github.com/headtrackr/examples/media/targets_thumbnail.png)](http://auduno.github.com/headtrackr/examples/targets.html)
+[![snake](http://nicolas-beauvais.com/Snake/thumbs.png)](http://nicolas-beauvais.com/Snake/index.html)
 
 ### Usage ###
 
