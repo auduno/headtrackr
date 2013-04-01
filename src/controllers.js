@@ -82,7 +82,7 @@ headtrackr.controllers.three.realisticAbsoluteCameraControl = function(camera, s
  * Optional parameters:
  *   screenHeight : vertical size of computer screen (default is 20 cm, i.e. typical laptop size)
  */
-headtrackr.controllers.threerealisticRelativeCameraControl = function(camera, scaling, relativeFixedDistance, params) {
+headtrackr.controllers.three.realisticRelativeCameraControl = function(camera, scaling, relativeFixedDistance, params) {
 	
 	// we assume that the parent of camera is the scene
 	
