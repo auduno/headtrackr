@@ -9,5 +9,10 @@
     "url": "https://github.com/auduno/headtrackr.git"
   },
   "bugs": "https://github.com/auduno/headtrackr/issues",
-  "main": "headtrackr.js"
+  "main": "headtrackr.js",
+  "devDependencies": {
+    "grunt": "~0.4.2",
+    "grunt-contrib-concat": "~0.3.0",
+    "grunt-contrib-uglify": "~0.2.7"
+  }
 }

@@ -52,7 +52,8 @@ To get some more idea about usage look at the source code for the examples above
 
 ### Building from source ###
 
-Make sure you have [grunt](http://gruntjs.com/) installed and build in src folder with the command ```grunt ```
+Make sure you have [grunt](http://gruntjs.com/) and [node](http://nodejs.org/download/) installed.
+To install the development dependencies run ```npm install``` and to build it run ```grunt``` in the root directory.
 
 ### License ###
 
