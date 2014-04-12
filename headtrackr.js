@@ -115,6 +115,7 @@ headtrackr.Tracker = function(params) {
 	var headDiagonal = [];
 	
 	this.status = "";
+	this.stream = undefined;
 	
 	var statusEvent = document.createEvent("Event");
 	statusEvent.initEvent("headtrackrStatus", true, true);
@@ -168,15 +169,16 @@ headtrackr.Tracker = function(params) {
 			}
 			
 			// set up stream
-			navigator.getUserMedia(videoSelector, function( stream ) {
+			navigator.getUserMedia(videoSelector, (function( stream ) {
 				headtrackerStatus("camera found");
+				this.stream = stream;
 				if (video.mozCaptureStream) {
 				  video.mozSrcObject = stream;
 				} else {
 				  video.src = (window.URL && window.URL.createObjectURL(stream)) || stream;
 				}
 				video.play();
-			}, function() {
+			}).bind(this), function() {
 				headtrackerStatus("no camera");
 				insertAltVideo(video);
 			});
@@ -355,20 +357,20 @@ headtrackr.Tracker = function(params) {
 		
 		// sometimes canvasContext is not available yet, so try and catch if it's not there...
 		try {
-      canvasContext.drawImage(videoElement, 0, 0, canvasElement.width, canvasElement.height);
-      
-      // in some cases, the video sends events before starting to draw
-      // so check that we have something on video before starting to track
-      var canvasContent = headtrackr.getWhitebalance(canvasElement);
-      if (canvasContent > 0) {
-        run = true;
-        track();
-      } else {
-        window.setTimeout(starter, 100);
-      }
-    } catch (err) {
-      window.setTimeout(starter, 100);
-    }
+			canvasContext.drawImage(videoElement, 0, 0, canvasElement.width, canvasElement.height);
+			
+			// in some cases, the video sends events before starting to draw
+			// so check that we have something on video before starting to track
+			var canvasContent = headtrackr.getWhitebalance(canvasElement);
+			if (canvasContent > 0) {
+				run = true;
+				track();
+			} else {
+				window.setTimeout(starter, 100);
+			}
+		} catch (err) {
+			window.setTimeout(starter, 100);
+		}
 	}
 	
 	this.start = function() {
@@ -398,6 +400,12 @@ headtrackr.Tracker = function(params) {
 		faceFound = false;
 		
 		return true;
+	}
+	
+	this.stopStream = function() {
+		if (this.stream !== "undefined") {
+			this.stream.stop();
+		}
 	}
 	
 	this.getFOV = function() {
