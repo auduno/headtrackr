@@ -132,6 +132,23 @@
 <li><strong>calcAngles</strong> {<em>boolean</em>} : whether to calculate orientation of tracked object (default for camshift is true)</li>
 </ul>
 
+<h2 id="events">Functions</h2>
+
+<p>These are the functions that the <code>headtrackr.Tracker</code> object exposes:</p>
+
+<ul>
+  <li><strong><em>init</em></strong>( <em>video</em>, <em>canvas</em>, <em>setupVideo</em> ) : initialize headtrackr with a video to track faces on.</li>
+    <ul>
+      <li><em>video</em> : a video element to track faces on</li>
+      <li><em>canvas</em> : a canvas element to copy video input to, same size as video</li>
+      <li><em>setupVideo</em> (optional) : whether to automatically set up streaming from webcam (or fallback video) to video element or not. (Default is <em>true</em>)</li>
+    </ul>
+  <li><strong><em>start</em></strong>(  ) : start the tracker. Returns <code>false</code> if the tracker hasn't been initalized first.</li>
+  <li><strong><em>stop</em></strong>( ) : stop the running tracker.</li>
+  <li><strong><em>stopStream</em></strong>( ) : stop the mediastream from webcam if there is one.</li>
+  <li><strong><em>getFOV</em></strong>( ) : get estimated field of view of webcam.</li>
+</ul>
+
 <h2>Elements</h2>
 
 <p style="text-align:center"><a href="./htfig1b.png" rel="lightbox" title="Elements"><img src="./htfig1b.png" width="400px" height="151px"></img></a></p>
