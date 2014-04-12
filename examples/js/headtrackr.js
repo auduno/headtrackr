@@ -115,6 +115,7 @@ headtrackr.Tracker = function(params) {
 	var headDiagonal = [];
 	
 	this.status = "";
+	this.stream = undefined;
 	
 	var statusEvent = document.createEvent("Event");
 	statusEvent.initEvent("headtrackrStatus", true, true);
@@ -145,60 +146,63 @@ headtrackr.Tracker = function(params) {
 		}
 	}
 	
-	this.init = function(video, canvas) {
-		navigator.getUserMedia = navigator.getUserMedia || navigator.webkitGetUserMedia || navigator.mozGetUserMedia || navigator.msGetUserMedia;
-		window.URL = window.URL || window.webkitURL || window.msURL || window.mozURL;
-		// check for camerasupport
-		if (navigator.getUserMedia) {
-			headtrackerStatus("getUserMedia");
-			
-			// chrome 19 shim
-			var videoSelector = {video : true};
-			if (window.navigator.appVersion.match(/Chrome\/(.*?) /)) {
-				var chromeVersion = parseInt(window.navigator.appVersion.match(/Chrome\/(\d+)\./)[1], 10);
-				if (chromeVersion < 20) {
-					videoSelector = "video";
+	this.init = function(video, canvas, setupVideo) {
+		if (setupVideo === undefined || setupVideo == true) {
+			navigator.getUserMedia = navigator.getUserMedia || navigator.webkitGetUserMedia || navigator.mozGetUserMedia || navigator.msGetUserMedia;
+			window.URL = window.URL || window.webkitURL || window.msURL || window.mozURL;
+			// check for camerasupport
+			if (navigator.getUserMedia) {
+				headtrackerStatus("getUserMedia");
+				
+				// chrome 19 shim
+				var videoSelector = {video : true};
+				if (window.navigator.appVersion.match(/Chrome\/(.*?) /)) {
+					var chromeVersion = parseInt(window.navigator.appVersion.match(/Chrome\/(\d+)\./)[1], 10);
+					if (chromeVersion < 20) {
+						videoSelector = "video";
+					}
+				};
+				
+				// opera shim
+				if (window.opera) {
+					window.URL = window.URL || {};
+					if (!window.URL.createObjectURL) window.URL.createObjectURL = function(obj) {return obj;};
 				}
-			};
-			
-			// opera shim
-			if (window.opera) {
-				window.URL = window.URL || {};
-				if (!window.URL.createObjectURL) window.URL.createObjectURL = function(obj) {return obj;};
+				
+				// set up stream
+				navigator.getUserMedia(videoSelector, (function( stream ) {
+					headtrackerStatus("camera found");
+					this.stream = stream;
+					if (video.mozCaptureStream) {
+					  video.mozSrcObject = stream;
+					} else {
+					  video.src = (window.URL && window.URL.createObjectURL(stream)) || stream;
+					}
+					video.play();
+				}).bind(this), function() {
+					headtrackerStatus("no camera");
+					insertAltVideo(video);
+				});
+			} else {
+				headtrackerStatus("no getUserMedia");
+				if (!insertAltVideo(video)) {
+					return false;
+				}
 			}
-			
-			// set up stream
-			navigator.getUserMedia(videoSelector, function( stream ) {
-				headtrackerStatus("camera found");
-				if (video.mozCaptureStream) {
-				  video.mozSrcObject = stream;
+
+			// resize video when it is playing
+			video.addEventListener('playing', function() {
+				if(video.width > video.height) {
+					video.width = 320;
 				} else {
-				  video.src = (window.URL && window.URL.createObjectURL(stream)) || stream;
+					video.height = 240;
 				}
-				video.play();
-			}, function() {
-				headtrackerStatus("no camera");
-				insertAltVideo(video);
-			});
-		} else {
-			headtrackerStatus("no getUserMedia");
-			if (!insertAltVideo(video)) {
-				return false;
-			}
+			}, false);
 		}
 		
 		videoElement = video;
 		canvasElement = canvas;
 		canvasContext = canvas.getContext("2d");
-		
-		// resize video when it is playing
-		video.addEventListener('playing', function() {
-			if(video.width > video.height) {
-				video.width = 320;
-			} else {
-				video.height = 240;
-			}
-		}, false);
 		
 		// create ui if needed
 		if (params.ui) {
@@ -355,20 +359,20 @@ headtrackr.Tracker = function(params) {
 		
 		// sometimes canvasContext is not available yet, so try and catch if it's not there...
 		try {
-      canvasContext.drawImage(videoElement, 0, 0, canvasElement.width, canvasElement.height);
-      
-      // in some cases, the video sends events before starting to draw
-      // so check that we have something on video before starting to track
-      var canvasContent = headtrackr.getWhitebalance(canvasElement);
-      if (canvasContent > 0) {
-        run = true;
-        track();
-      } else {
-        window.setTimeout(starter, 100);
-      }
-    } catch (err) {
-      window.setTimeout(starter, 100);
-    }
+			canvasContext.drawImage(videoElement, 0, 0, canvasElement.width, canvasElement.height);
+			
+			// in some cases, the video sends events before starting to draw
+			// so check that we have something on video before starting to track
+			var canvasContent = headtrackr.getWhitebalance(canvasElement);
+			if (canvasContent > 0) {
+				run = true;
+				track();
+			} else {
+				window.setTimeout(starter, 100);
+			}
+		} catch (err) {
+			window.setTimeout(starter, 100);
+		}
 	}
 	
 	this.start = function() {
@@ -398,6 +402,12 @@ headtrackr.Tracker = function(params) {
 		faceFound = false;
 		
 		return true;
+	}
+	
+	this.stopStream = function() {
+		if (this.stream !== undefined) {
+			this.stream.stop();
+		}
 	}
 	
 	this.getFOV = function() {
@@ -1950,7 +1960,7 @@ headtrackr.controllers.three.realisticAbsoluteCameraControl = function(camera, s
  * Optional parameters:
  *   screenHeight : vertical size of computer screen (default is 20 cm, i.e. typical laptop size)
  */
-headtrackr.controllers.threerealisticRelativeCameraControl = function(camera, scaling, relativeFixedDistance, params) {
+headtrackr.controllers.three.realisticRelativeCameraControl = function(camera, scaling, relativeFixedDistance, params) {
 	
 	// we assume that the parent of camera is the scene
 	
@@ -2004,6 +2014,7 @@ headtrackr.controllers.threerealisticRelativeCameraControl = function(camera, sc
 		
 	}, false);
 }
+
 
 
 	return headtrackr;
