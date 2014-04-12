@@ -96,61 +96,63 @@ headtrackr.Tracker = function(params) {
 		}
 	}
 	
-	this.init = function(video, canvas) {
-		navigator.getUserMedia = navigator.getUserMedia || navigator.webkitGetUserMedia || navigator.mozGetUserMedia || navigator.msGetUserMedia;
-		window.URL = window.URL || window.webkitURL || window.msURL || window.mozURL;
-		// check for camerasupport
-		if (navigator.getUserMedia) {
-			headtrackerStatus("getUserMedia");
-			
-			// chrome 19 shim
-			var videoSelector = {video : true};
-			if (window.navigator.appVersion.match(/Chrome\/(.*?) /)) {
-				var chromeVersion = parseInt(window.navigator.appVersion.match(/Chrome\/(\d+)\./)[1], 10);
-				if (chromeVersion < 20) {
-					videoSelector = "video";
+	this.init = function(video, canvas, setupVideo) {
+		if (setupVideo !== undefined && setupVideo == true) {
+			navigator.getUserMedia = navigator.getUserMedia || navigator.webkitGetUserMedia || navigator.mozGetUserMedia || navigator.msGetUserMedia;
+			window.URL = window.URL || window.webkitURL || window.msURL || window.mozURL;
+			// check for camerasupport
+			if (navigator.getUserMedia) {
+				headtrackerStatus("getUserMedia");
+				
+				// chrome 19 shim
+				var videoSelector = {video : true};
+				if (window.navigator.appVersion.match(/Chrome\/(.*?) /)) {
+					var chromeVersion = parseInt(window.navigator.appVersion.match(/Chrome\/(\d+)\./)[1], 10);
+					if (chromeVersion < 20) {
+						videoSelector = "video";
+					}
+				};
+				
+				// opera shim
+				if (window.opera) {
+					window.URL = window.URL || {};
+					if (!window.URL.createObjectURL) window.URL.createObjectURL = function(obj) {return obj;};
 				}
-			};
-			
-			// opera shim
-			if (window.opera) {
-				window.URL = window.URL || {};
-				if (!window.URL.createObjectURL) window.URL.createObjectURL = function(obj) {return obj;};
+				
+				// set up stream
+				navigator.getUserMedia(videoSelector, (function( stream ) {
+					headtrackerStatus("camera found");
+					this.stream = stream;
+					if (video.mozCaptureStream) {
+					  video.mozSrcObject = stream;
+					} else {
+					  video.src = (window.URL && window.URL.createObjectURL(stream)) || stream;
+					}
+					video.play();
+				}).bind(this), function() {
+					headtrackerStatus("no camera");
+					insertAltVideo(video);
+				});
+			} else {
+				headtrackerStatus("no getUserMedia");
+				if (!insertAltVideo(video)) {
+					return false;
+				}
 			}
-			
-			// set up stream
-			navigator.getUserMedia(videoSelector, (function( stream ) {
-				headtrackerStatus("camera found");
-				this.stream = stream;
-				if (video.mozCaptureStream) {
-				  video.mozSrcObject = stream;
+
+			// resize video when it is playing
+			video.addEventListener('playing', function() {
+				if(video.width > video.height) {
+					video.width = 320;
 				} else {
-				  video.src = (window.URL && window.URL.createObjectURL(stream)) || stream;
+					video.height = 240;
 				}
-				video.play();
-			}).bind(this), function() {
-				headtrackerStatus("no camera");
-				insertAltVideo(video);
-			});
-		} else {
-			headtrackerStatus("no getUserMedia");
-			if (!insertAltVideo(video)) {
-				return false;
-			}
+			}, false);
 		}
 		
 		videoElement = video;
 		canvasElement = canvas;
 		canvasContext = canvas.getContext("2d");
-		
-		// resize video when it is playing
-		video.addEventListener('playing', function() {
-			if(video.width > video.height) {
-				video.width = 320;
-			} else {
-				video.height = 240;
-			}
-		}, false);
 		
 		// create ui if needed
 		if (params.ui) {
