@@ -147,7 +147,7 @@ headtrackr.Tracker = function(params) {
 	}
 	
 	this.init = function(video, canvas, setupVideo) {
-		if (setupVideo !== undefined && setupVideo == true) {
+		if (setupVideo === undefined || setupVideo == true) {
 			navigator.getUserMedia = navigator.getUserMedia || navigator.webkitGetUserMedia || navigator.mozGetUserMedia || navigator.msGetUserMedia;
 			window.URL = window.URL || window.webkitURL || window.msURL || window.mozURL;
 			// check for camerasupport
@@ -405,7 +405,7 @@ headtrackr.Tracker = function(params) {
 	}
 	
 	this.stopStream = function() {
-		if (this.stream !== "undefined") {
+		if (this.stream !== undefined) {
 			this.stream.stop();
 		}
 	}
