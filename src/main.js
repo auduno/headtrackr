@@ -165,7 +165,7 @@ headtrackr.Tracker = function(params) {
 		this.initialized = true;
 	}
 	
-	track = function() {
+	var track = function() {
 		// Copy video to canvas
 		canvasContext.drawImage(videoElement, 0, 0, canvasElement.width, canvasElement.height);
 		
