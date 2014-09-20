@@ -7,7 +7,7 @@
  * Licensed under the MIT License
 */
 
-headtrackr.Webcam = {
+Webcam = {
 	version: '1.0.0',
 	
 	// globals
