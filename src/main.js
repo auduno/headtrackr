@@ -136,7 +136,22 @@ headtrackr.Tracker = function(params) {
 			} else {
 				headtrackerStatus("no getUserMedia");
 				if (!insertAltVideo(video)) {
-					return false;
+					// Flash fallback
+					headtrackr.Webcam.init();
+					headtrackr.Webcam.set({
+						width: 320,
+						height: 240,
+						force_flash: true,
+						image_format: 'jpeg',
+						jpeg_quality: 90
+					});
+
+					var flashContainer = document.createElement('div');
+					flashContainer.id = 'webcamjs-flash-container'
+					canvas.parentNode.appendChild(flashContainer);
+					headtrackr.Webcam.attach(flashContainer);
+
+					video.style.display = 'none'
 				}
 			}
 
