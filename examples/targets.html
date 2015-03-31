@@ -104,8 +104,8 @@
 						scene.add( cylinder );
 						
 						var geometry = new THREE.Geometry();
-						geometry.vertices.push( new THREE.Vertex( new THREE.Vector3( 0, 0, -80000 ) ) );
-						geometry.vertices.push( new THREE.Vertex( new THREE.Vector3( 0, 0, z ) ) );
+						geometry.vertices.push( new THREE.Vector3( 0, 0, -80000 ) );
+						geometry.vertices.push( new THREE.Vector3( 0, 0, z ) );
 						var line = new THREE.Line( geometry, new THREE.LineBasicMaterial( { color: 0xeeeeee } ) );
 						line.position.x = x;
 						line.position.y = y;

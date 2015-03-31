@@ -70,9 +70,9 @@
         targetObject.add( sprite );
         
         var geometry = new THREE.Geometry();
-        geometry.vertices.push( new THREE.Vertex( new THREE.Vector3( -sprite.position.x, -sprite.position.y, 0 ) ) );
-        geometry.vertices.push( new THREE.Vertex( new THREE.Vector3( 0, 0, z ) ) );
-        var line = new THREE.Line( geometry, new THREE.LineBasicMaterial( { color: 0xffffff } ) );
+        geometry.vertices.push( new THREE.Vector3( -sprite.position.x, -sprite.position.y, 0 ) );
+        geometry.vertices.push( new THREE.Vector3( 0, 0, z ) );
+        var line = new THREE.Line( geometry, new THREE.LineBasicMaterial( { color: 0xffffff, linewidth : 1.5 } ) );
         line.position.x = sprite.position.x;
         line.position.y = sprite.position.y;
         targetObject.add( line );
