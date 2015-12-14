@@ -9,12 +9,14 @@ For a demonstration see [this video](https://vimeo.com/44049736) or try out some
 
 ### Examples ###
 
-[![facetracking](http://auduno.github.com/headtrackr/examples/media/facetracking_thumbnail.png)](http://auduno.github.com/headtrackr/examples/facetracking.html)
-[![sprites](http://auduno.github.com/headtrackr/examples/media/sprites_thumbnail.png)](http://auduno.github.com/headtrackr/examples/sprites_canvas.html)
-[![facekat](http://auduno.github.com/headtrackr/examples/media/facekat_thumbnail.png)](http://www.shinydemos.com/facekat/)
-[![targets](http://auduno.github.com/headtrackr/examples/media/targets_thumbnail.png)](http://auduno.github.com/headtrackr/examples/targets.html)
+[![facetracking](http://auduno.github.com/headtrackr/examples/media/facetracking_thumbnail.png)](https://auduno.github.com/headtrackr/examples/facetracking.html)
+[![sprites](http://auduno.github.com/headtrackr/examples/media/sprites_thumbnail.png)](https://auduno.github.com/headtrackr/examples/sprites_canvas.html)
+<!--[![facekat](http://auduno.github.com/headtrackr/examples/media/facekat_thumbnail.png)](http://www.shinydemos.com/facekat/)-->
+[![targets](http://auduno.github.com/headtrackr/examples/media/targets_thumbnail.png)](https://auduno.github.com/headtrackr/examples/targets.html)
 
 ### Usage ###
+
+**NB!** Recent versions of Chrome only enable getUserMedia for https sites, so in Chrome this example will only work for https sites.
 
 Download the minified library [headtrackr.js](https://github.com/auduno/headtrackr/raw/master/headtrackr.js) and include it in your webpage.
 
@@ -45,10 +47,10 @@ To get some more idea about usage look at the source code for the examples above
 
 ### Projects that have used headtrackr ###
 
-[![movembergames](http://auduno.github.com/headtrackr/examples/media/movembergames_thumbnail.png)](http://movembergames.com)
+<!--[![movembergames](http://auduno.github.com/headtrackr/examples/media/movembergames_thumbnail.png)](http://movembergames.com)-->
 [![street-facing](http://auduno.github.com/headtrackr/examples/media/street-facing_thumbnail.jpg)](https://github.com/alexhancock/street-facing)
-[![Real-time responsive typography](http://auduno.github.com/headtrackr/examples/media/responsive_text.png)](http://webdesign.maratz.com/lab/responsivetypography/realtime/)
-[![snake](http://nicolas-beauvais.com/Snake/thumbs.png)](http://nicolas-beauvais.com/Snake/)
+<!--[![Real-time responsive typography](http://auduno.github.com/headtrackr/examples/media/responsive_text.png)](http://webdesign.maratz.com/lab/responsivetypography/realtime/)-->
+<!--[![snake](http://nicolas-beauvais.com/Snake/thumbs.png)](http://nicolas-beauvais.com/Snake/)-->
 
 ### Building from source ###
 
