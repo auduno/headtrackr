@@ -16,7 +16,7 @@ For a demonstration see [this video](https://vimeo.com/44049736) or try out some
 
 ### Usage ###
 
-**NB!** Recent versions of Chrome only enable getUserMedia for https sites, so in Chrome this example will only work for https sites.
+**NB!** Recent versions of Chrome only enable getUserMedia for https sites (and localhost), so make sure that live sites use https when using headtrackr.
 
 Download the minified library [headtrackr.js](https://github.com/auduno/headtrackr/raw/master/headtrackr.js) and include it in your webpage.
 
