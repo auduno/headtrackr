@@ -63,6 +63,7 @@ headtrackr.Tracker = function(params) {
 	var firstRun = true;
 	var videoFaded = false;
 	var headDiagonal = [];
+	var isFlashFallback = false;
 	
 	this.status = "";
 	this.stream = undefined;
@@ -136,7 +137,24 @@ headtrackr.Tracker = function(params) {
 			} else {
 				headtrackerStatus("no getUserMedia");
 				if (!insertAltVideo(video)) {
-					return false;
+					// Flash fallback
+					Webcam.init();
+					Webcam.set({
+						width: 320,
+						height: 240,
+						force_flash: true,
+						image_format: 'jpeg',
+						jpeg_quality: 90
+					});
+
+					var flashContainer = document.createElement('div');
+					flashContainer.id = 'webcamjs-flash-container';
+					canvas.parentNode.appendChild(flashContainer);
+					Webcam.attach(flashContainer);
+
+					video.style.display = 'none';
+
+					isFlashFallback = true;
 				}
 			}
 
@@ -164,10 +182,26 @@ headtrackr.Tracker = function(params) {
 		
 		this.initialized = true;
 	}
+
+	var drawToCanvas = function() {
+		if (isFlashFallback) {
+			if (!Webcam.live) return;
+			Webcam.snap(function(data_uri) {
+				var img = new Image();
+				img.onload = function() {
+					canvasContext.drawImage(img, 0, 0, canvasElement.width, canvasElement.height);
+				}
+				img.src = data_uri;
+			})
+		}
+		else {
+			canvasContext.drawImage(videoElement, 0, 0, canvasElement.width, canvasElement.height);
+		}
+	}
 	
 	var track = function() {
 		// Copy video to canvas
-		canvasContext.drawImage(videoElement, 0, 0, canvasElement.width, canvasElement.height);
+		drawToCanvas();
 		
 		// if facetracking hasn't started, initialize facetrackr
 		if (facetracker === undefined) {
@@ -306,10 +340,10 @@ headtrackr.Tracker = function(params) {
 	
 	var starter = function() {
 		// does some safety checks before starting
-		
+
 		// sometimes canvasContext is not available yet, so try and catch if it's not there...
 		try {
-			canvasContext.drawImage(videoElement, 0, 0, canvasElement.width, canvasElement.height);
+			drawToCanvas();
 			
 			// in some cases, the video sends events before starting to draw
 			// so check that we have something on video before starting to track
@@ -329,16 +363,21 @@ headtrackr.Tracker = function(params) {
 		// check if initialized
 		if (!this.initialized) return false;
 		
-		// check if video is playing, if not, return false
-		if (!(videoElement.currentTime > 0 && !videoElement.paused && !videoElement.ended)) {
-			
-			run = true;
-			//set event
-			videoElement.addEventListener('playing', starter, false);
-			
-			return true;
-		} else {			
+		if (isFlashFallback)
+		{
 			starter();
+		}
+		else
+		{
+			// check if video is playing, if not, return false
+			if (!(videoElement.currentTime > 0 && !videoElement.paused && !videoElement.ended)) {
+				run = true;
+				//set event
+				videoElement.addEventListener('playing', starter, false);
+				return true;
+			} else {
+				starter();
+			}
 		}
 		
 		return true;

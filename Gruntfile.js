@@ -9,6 +9,7 @@ module.exports = function(grunt) {
             'src/license.js',
             'src/header.js.txt',
             'src/main.js',
+            'src/webcam.js',
             'src/ccv.js',
             'src/cascade.js',
             'src/whitebalance.js',
