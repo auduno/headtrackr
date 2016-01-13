@@ -1,9 +1,9 @@
 //Put your desired video size here.
 //NOTE LARGER VIDEO SIZES WILL CAUSE PROGRAM TO RUN SLOWER
-//Put custom video height here
-var VID_WIDTH = 640;
 //Put custom video width here
-var VID_WIDTH = 480;
+var VID_WIDTH = 640;
+//Put custom video height here
+var VID_HEIGHT = 480;
 
 
 /**
