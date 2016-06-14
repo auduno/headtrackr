@@ -26,6 +26,13 @@
  * @author auduno / github.com/auduno
  */
 
+//Put your desired video size here.
+//NOTE LARGER VIDEO SIZES WILL CAUSE PROGRAM TO RUN SLOWER
+//Put custom video width here
+var VID_WIDTH = 640;
+//Put custom video height here
+var VID_HEIGHT = 480;
+
 var headtrackr = {};
 headtrackr.rev = 2;
 
@@ -143,9 +150,9 @@ headtrackr.Tracker = function(params) {
 			// resize video when it is playing
 			video.addEventListener('playing', function() {
 				if(video.width > video.height) {
-					video.width = 320;
+					video.width = VID_WIDTH;
 				} else {
-					video.height = 240;
+					video.height = VID_HEIGHT;
 				}
 			}, false);
 		}
