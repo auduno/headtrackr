@@ -52,10 +52,10 @@
  * Wrapper for headtrackr library
  *
  * Usage:
- *	var htracker = new headtrackr.Tracker(); 
- *	htracker.init(videoInput, canvasInput); 
- *	htracker.start(); 
- * 
+ *	var htracker = new headtrackr.Tracker();
+ *	htracker.init(videoInput, canvasInput);
+ *	htracker.start();
+ *
  * Optional parameters can be passed to Tracker like this:
  *	 new headtrackr.Tracker({ ui : false, altVideo : "somevideo.ogv" });
  *
@@ -83,9 +83,9 @@ headtrackr.rev = 2;
  * @constructor
  */
 headtrackr.Tracker = function(params) {
-	
+
 	if (!params) params = {};
-	
+
 	if (params.smoothing === undefined) params.smoothing = true;
 	if (params.retryDetection === undefined) params.retryDetection = true;
 	if (params.ui === undefined) params.ui = true;
@@ -103,7 +103,7 @@ headtrackr.Tracker = function(params) {
 	if (params.cameraOffset === undefined) params.cameraOffset = 11.5;
 	if (params.calcAngles === undefined) params.calcAngles = false;
 	if (params.headPosition === undefined) params.headPosition = true;
-	
+
 	var ui, smoother, facetracker, headposition, canvasContext, videoElement, detector;
 	var detectionTimer;
 	var fov = 0;
@@ -113,19 +113,19 @@ headtrackr.Tracker = function(params) {
 	var firstRun = true;
 	var videoFaded = false;
 	var headDiagonal = [];
-	
+
 	this.status = "";
 	this.stream = undefined;
-	
+
 	var statusEvent = document.createEvent("Event");
 	statusEvent.initEvent("headtrackrStatus", true, true);
-	
+
 	var headtrackerStatus = function(message) {
 		statusEvent.status = message;
 		document.dispatchEvent(statusEvent);
 		this.status = message;
 	}.bind(this);
-	
+
 	var insertAltVideo = function(video) {
 		if (params.altVideo !== undefined) {
 			if (supports_video()) {
@@ -145,7 +145,7 @@ headtrackr.Tracker = function(params) {
 			return false;
 		}
 	}
-	
+
 	this.init = function(video, canvas, setupVideo) {
 		if (setupVideo === undefined || setupVideo == true) {
 			navigator.getUserMedia = navigator.getUserMedia || navigator.webkitGetUserMedia || navigator.mozGetUserMedia || navigator.msGetUserMedia;
@@ -153,7 +153,7 @@ headtrackr.Tracker = function(params) {
 			// check for camerasupport
 			if (navigator.getUserMedia) {
 				headtrackerStatus("getUserMedia");
-				
+
 				// chrome 19 shim
 				var videoSelector = {video : true};
 				if (window.navigator.appVersion.match(/Chrome\/(.*?) /)) {
@@ -162,13 +162,13 @@ headtrackr.Tracker = function(params) {
 						videoSelector = "video";
 					}
 				};
-				
+
 				// opera shim
 				if (window.opera) {
 					window.URL = window.URL || {};
 					if (!window.URL.createObjectURL) window.URL.createObjectURL = function(obj) {return obj;};
 				}
-				
+
 				// set up stream
 				navigator.getUserMedia(videoSelector, (function( stream ) {
 					headtrackerStatus("camera found");
@@ -176,7 +176,11 @@ headtrackr.Tracker = function(params) {
 					if (video.mozCaptureStream) {
 					  video.mozSrcObject = stream;
 					} else {
-					  video.src = (window.URL && window.URL.createObjectURL(stream)) || stream;
+					  try {
+              video.srcObject = stream;
+            } catch (error) {
+              video.src = video.src = (window.URL && window.URL.createObjectURL(stream)) || stream;
+            }
 					}
 					video.play();
 				}).bind(this), function() {
@@ -199,39 +203,39 @@ headtrackr.Tracker = function(params) {
 				}
 			}, false);
 		}
-		
+
 		videoElement = video;
 		canvasElement = canvas;
 		canvasContext = canvas.getContext("2d");
-		
+
 		// create ui if needed
 		if (params.ui) {
 			ui = new headtrackr.Ui();
 		}
-		
+
 		// create smoother if enabled
 		smoother = new headtrackr.Smoother(0.35, params.detectionInterval+15);
-		
+
 		this.initialized = true;
 	}
-	
+
 	var track = function() {
 		// Copy video to canvas
 		canvasContext.drawImage(videoElement, 0, 0, canvasElement.width, canvasElement.height);
-		
+
 		// if facetracking hasn't started, initialize facetrackr
 		if (facetracker === undefined) {
 			facetracker = new headtrackr.facetrackr.Tracker({debug : params.debug, calcAngles : params.calcAngles});
 			facetracker.init(canvasElement);
 		}
-		
+
 		// track face
 		facetracker.track()
 		var faceObj = facetracker.getTrackingObject({debug : params.debug});
-		
+
 		if (faceObj.detection == "WB") headtrackerStatus("whitebalance");
 		if (firstRun && faceObj.detection == "VJ") headtrackerStatus("detecting");
-		
+
 		// check if we have a detection first
 		if (!(faceObj.confidence == 0)) {
 			if (faceObj.detection == "VJ") {
@@ -242,10 +246,10 @@ headtrackr.Tracker = function(params) {
 				if (((new Date).getTime() - detectionTimer) > 5000) {
 					headtrackerStatus("hints");
 				}
-				
+
 				var x = (faceObj.x + faceObj.width/2); //midpoint
 				var y = (faceObj.y + faceObj.height/2); //midpoint
-				
+
 				if (params.debug) {
 					// draw detected face on debuggercanvas
 					debugContext.strokeStyle = "#0000CC";
@@ -255,9 +259,9 @@ headtrackr.Tracker = function(params) {
 			if (faceObj.detection == "CS") {
 				var x = faceObj.x; //midpoint
 				var y = faceObj.y; //midpoint
-				
+
 				if (detectionTimer !== undefined) detectionTimer = undefined;
-				
+
 				if (params.debug) {
 					// draw tracked face on debuggercanvas
 					debugContext.translate(faceObj.x, faceObj.y)
@@ -267,26 +271,26 @@ headtrackr.Tracker = function(params) {
 					debugContext.rotate((Math.PI/2)-faceObj.angle);
 					debugContext.translate(-faceObj.x, -faceObj.y);
 				}
-				
+
 				// fade out video if it's showing
 				if (!videoFaded && params.fadeVideo) {
 					fadeVideo();
 					videoFaded = true;
 				}
-				
+
 				this.status = 'tracking';
-				
+
 				//check if we've lost tracking of face
 				if (faceObj.width == 0 || faceObj.height == 0) {
 					if (params.retryDetection) {
 						// retry facedetection
 						headtrackerStatus("redetecting");
-						
+
 						facetracker = new headtrackr.facetrackr.Tracker({whitebalancing : false, debug: params.debug, calcAngles : params.calcAngles});
 						facetracker.init(canvasElement);
 						faceFound = false;
 						headposition = undefined;
-						
+
 						// show video again if it's not already showing
 						if (videoFaded) {
 							videoElement.style.opacity = 1;
@@ -301,7 +305,7 @@ headtrackr.Tracker = function(params) {
 						headtrackerStatus("found");
 						faceFound = true;
 					}
-					
+
 					if (params.smoothing) {
 						// smooth values
 						if (!smoother.initialized) {
@@ -309,15 +313,15 @@ headtrackr.Tracker = function(params) {
 						}
 						faceObj = smoother.smooth(faceObj);
 					}
-					
+
 					// get headposition
 					if (headposition === undefined && params.headPosition) {
 						// wait until headdiagonal is stable before initializing headposition
 						var stable = false;
-						
+
 						// calculate headdiagonal
 						var headdiag = Math.sqrt(faceObj.width*faceObj.width + faceObj.height*faceObj.height);
-						
+
 						if (headDiagonal.length < 6) {
 							headDiagonal.push(headdiag);
 						} else {
@@ -327,7 +331,7 @@ headtrackr.Tracker = function(params) {
 								stable = true;
 							}
 						}
-						
+
 						if (stable) {
 							if (firstRun) {
 								if (params.fov === undefined) {
@@ -348,19 +352,19 @@ headtrackr.Tracker = function(params) {
 				}
 			}
 		}
-	 
+
 		if (run) {
 			detector = window.setTimeout(track, params.detectionInterval);
 		}
 	}.bind(this);
-	
+
 	var starter = function() {
 		// does some safety checks before starting
-		
+
 		// sometimes canvasContext is not available yet, so try and catch if it's not there...
 		try {
 			canvasContext.drawImage(videoElement, 0, 0, canvasElement.width, canvasElement.height);
-			
+
 			// in some cases, the video sends events before starting to draw
 			// so check that we have something on video before starting to track
 			var canvasContent = headtrackr.getWhitebalance(canvasElement);
@@ -374,46 +378,53 @@ headtrackr.Tracker = function(params) {
 			window.setTimeout(starter, 100);
 		}
 	}
-	
+
 	this.start = function() {
 		// check if initialized
 		if (!this.initialized) return false;
-		
+
 		// check if video is playing, if not, return false
 		if (!(videoElement.currentTime > 0 && !videoElement.paused && !videoElement.ended)) {
-			
+
 			run = true;
 			//set event
 			videoElement.addEventListener('playing', starter, false);
-			
+
 			return true;
-		} else {			
+		} else {
 			starter();
 		}
-		
+
 		return true;
 	}
-	
+
 	this.stop = function() {
 		window.clearTimeout(detector);
 		run = false;
 		headtrackerStatus("stopped");
 		facetracker = undefined;
 		faceFound = false;
-		
+
 		return true;
 	}
-	
+
 	this.stopStream = function() {
 		if (this.stream !== undefined) {
-			this.stream.stop();
+            // Support for pre-standardisation browsers
+            if (this.stream.stop !== undefined) {
+		         this.stream.stop();
+            }
+            // Standards-compliant (per-stream)
+            else if (this.stream.getVideoTracks !== undefined) {
+                this.stream.getVideoTracks().forEach( function(t){ t.stop(); })
+            }
 		}
 	}
-	
+
 	this.getFOV = function() {
 		return fov;
 	}
-	
+
 	// fade out videoElement
 	var fadeVideo = function() {
 		if (videoElement.style.opacity == "") {
@@ -431,29 +442,29 @@ headtrackr.Tracker = function(params) {
 // bind shim
 // from https://developer.mozilla.org/en/JavaScript/Reference/Global_Objects/Function/bind
 
-if (!Function.prototype.bind) {	 
-	Function.prototype.bind = function (oThis) {	
-		if (typeof this !== "function") {	 
-			// closest thing possible to the ECMAScript 5 internal IsCallable function	
-			throw new TypeError("Function.prototype.bind - what is trying to be bound is not callable");	
-		}	 
-	
-		var aArgs = Array.prototype.slice.call(arguments, 1),		
-				fToBind = this,		
-				fNOP = function () {},	
-				fBound = function () {	
-					return fToBind.apply(this instanceof fNOP	 
-																 ? this	 
-																 : oThis || window,	 
-															 aArgs.concat(Array.prototype.slice.call(arguments)));	
-				};	
-	
-		fNOP.prototype = this.prototype;	
-		fBound.prototype = new fNOP();	
-	
-		return fBound;	
-	};	
-}	 
+if (!Function.prototype.bind) {
+	Function.prototype.bind = function (oThis) {
+		if (typeof this !== "function") {
+			// closest thing possible to the ECMAScript 5 internal IsCallable function
+			throw new TypeError("Function.prototype.bind - what is trying to be bound is not callable");
+		}
+
+		var aArgs = Array.prototype.slice.call(arguments, 1),
+				fToBind = this,
+				fNOP = function () {},
+				fBound = function () {
+					return fToBind.apply(this instanceof fNOP
+																 ? this
+																 : oThis || window,
+															 aArgs.concat(Array.prototype.slice.call(arguments)));
+				};
+
+		fNOP.prototype = this.prototype;
+		fBound.prototype = new fNOP();
+
+		return fBound;
+	};
+}
 
 // video support utility functions
 
@@ -478,6 +489,7 @@ function supports_webm_video() {
 	var v = document.createElement("video");
 	return v.canPlayType('video/webm; codecs="vp8, vorbis"');
 }
+
 /**
  * Viola-Jones-like face detection algorithm
  * Some explanation here: http://liuliu.me/eyes/javascript-face-detection-explained/
